@@ -1,5 +1,5 @@
-export const bot_port = process.env.PORT || 8000;
-export const slash_port = 4050;
+export const bot_port = 8000;
+export const slash_port = process.env.PORT || 4050;
 export const json_data_path = 'data.json'
 export const hours_column = 4
 export const name_column = 0;
