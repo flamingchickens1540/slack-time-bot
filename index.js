@@ -182,7 +182,7 @@ const slashServer = http.createServer(async(request,response)=>{
 
         response.writeHead(200);
         response.end()
-
+try{
         let body = "";
 
         await request.on('data', function(data) {
@@ -190,7 +190,7 @@ const slashServer = http.createServer(async(request,response)=>{
             //console.log('Partial body: ' + '\n' + body)
         })
         
-        //console.log(`full body: ${body}`)
+        console.log(`full body: ${body}`)
 
         let split = body.split("&");
         let requestDict = {};
@@ -373,7 +373,7 @@ const slashServer = http.createServer(async(request,response)=>{
         }
     }
 
-    
+}catch(err) {console.log(err)}
     return 
 }
 });
