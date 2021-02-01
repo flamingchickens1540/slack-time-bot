@@ -181,7 +181,7 @@ const slashServer = http.createServer(async(request,response)=>{
     if(request.method == "POST") {
 
         response.writeHead(200);
-        response.end()
+        
 try{
         let body = "";
 
@@ -191,6 +191,8 @@ try{
         })
         
         console.log(`full body: ${body}`)
+
+        response.end()
 
         let split = body.split("&");
         let requestDict = {};
