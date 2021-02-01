@@ -187,7 +187,7 @@ try{
 
         await request.on('data', function(data) {
             body += data
-            //console.log('Partial body: ' + '\n' + body)
+            console.log('Partial body: ' + '\n' + body)
         })
         
         console.log(`full body: ${body}`)
