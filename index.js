@@ -192,8 +192,8 @@ try{
             body += data
             console.log('Partial body: ' + '\n' + body)
         })
-        request.on('close',function(data) {
-            console.log('CLOSED!')
+        request.on('end',function(data) {
+            console.log('RE ENDED!')
         })
         
         
