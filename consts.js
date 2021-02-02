@@ -4,7 +4,7 @@ export const json_data_path = 'data.json'
 export const hours_column = 4
 export const name_column = 0;
 export const max_row = 41;
-export const hours_sheet_id = '1-j-sAjyLNufVCZUzr4fnkDNj8JPIN9o8t6_-CuopHSY'
+export const hours_sheet_id = '10AcplDpfbXlECQYaFuTFcIeN2U8raP9XysuN3e31js0'
 export const dmRejection = true;
 export const initing = true;
 
