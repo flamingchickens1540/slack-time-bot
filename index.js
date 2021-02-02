@@ -194,7 +194,7 @@ const slashServer = http.createServer(async (request, response) => {
             console.log('Partial body: ' + '\n' + body)
         })
 
-        request.on('end', function (data) {
+        request.on('end', async (data)=>{
             try {
 
                 console.log(`full body: ${body}`)
