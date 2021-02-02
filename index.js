@@ -175,7 +175,6 @@ events.start(bot_port).then(()=>{
 
 
 
-
 const slashServer = http.createServer(async(request,response)=>{
 
     if(request.method == "POST") {
