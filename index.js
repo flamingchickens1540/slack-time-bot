@@ -180,14 +180,22 @@ const slashServer = http.createServer(async(request,response)=>{
     if(request.method == "POST") {
 
         response.writeHead(200);
-        
+
+        // request.once('close',()=>{})
 try{
+
         let body = "";
 
-        await request.on('data', function(data) {
+
+
+        request.on('data', function(data) {
             body += data
             console.log('Partial body: ' + '\n' + body)
         })
+        request.on('close',function(data) {
+            console.log('CLOSED!')
+        })
+        
         
         console.log(`full body: ${body}`)
 
