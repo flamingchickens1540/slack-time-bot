@@ -4,12 +4,14 @@ export const json_data_path = 'data.json'
 export const hours_column = 4
 export const name_column = 0;
 export const max_row = 41;
-export const hours_sheet_id = '10AcplDpfbXlECQYaFuTFcIeN2U8raP9XysuN3e31js0'
+// export const hours_sheet_id = '10AcplDpfbXlECQYaFuTFcIeN2U8raP9XysuN3e31js0'
+export const hours_sheet_id = '1HrqjjiX9Hghol3ugSFyL8Hslag59cUP88hAgJHW-TUU'
 export const dmRejection = true;
 export const initing = true;
 
 export const log_modal = {
 	"type": "modal",
+	"private_metadata":"time_submission",
 	"title": {
 		"type": "plain_text",
 		"text": "Log Work Time",
@@ -102,6 +104,9 @@ export const getAcceptedDm = (pigChumpId, hours,activity)=>{
 export const getDeclinedDm = (pigChumpId, hours,activity)=>{
 	return `:x: *<@${pigChumpId}>* declined *${hours} hours* for activity:\n>\`${activity}\``
 }
+export const getDeclinedMessageDM = (uid,hours,activity,message)=>{
+	return  `:x: *<@${uid}>* declined *${hours} hours* for activity::x:\n>\`${activity}\`\n:loudspeaker: *Message:*\n>\`${message}\``
+}
 
 
 export const getSubmittedDmHrsAndMins = (hrs,mins,activity)=>{
@@ -139,52 +144,174 @@ export const getRequestBlockList = (uid,hrs,mins,activity,mid)=>{
 
 
 
+	// return [
+	// 	{
+	// 		"type": "header",
+	// 		"text": {
+	// 			"type": "plain_text",
+	// 			"text": "Time Submission",
+	// 			"emoji": true
+	// 		}
+	// 	},
+	// 	{
+	// 		"type": "section",
+	// 		"text": {
+	// 			"type": "mrkdwn",
+	// 			"text": `>>>*<@${uid}>* submitted *${timeArg}* for activity\n\`${activity}\``
+	// 		}
+	// 	},
+	// 	{
+	// 		"type": "actions",
+	// 		"elements": [
+	// 			{
+	// 				"type": "button",
+	// 				"text": {
+	// 					"type": "plain_text",
+	// 					"emoji": true,
+	// 					"text": "Add to Sheet"
+	// 				},
+	// 				"style": "primary",
+	// 				"value": `${mid}`
+	// 			},
+	// 			{
+	// 				"type": "button",
+	// 				"text": {
+	// 					"type": "plain_text",
+	// 					"emoji": true,
+	// 					"text": "Decline"
+	// 				},
+	// 				"style": "danger",
+	// 				"value": "decline"
+	// 			}
+	// 		]
+	// 	},
+	// 	{
+	// 		"type": "divider"
+	// 	}
+	// ]
+
+
+
+
+
+
+
+
+
+
+
+
 	return [
-		{
-			"type": "header",
-			"text": {
-				"type": "plain_text",
-				"text": "Time Submission",
-				"emoji": true
-			}
-		},
-		{
-			"type": "section",
-			"text": {
-				"type": "mrkdwn",
-				"text": `>>>*<@${uid}>* submitted *${timeArg}* for activity\n\`${activity}\``
-			}
-		},
-		{
-			"type": "actions",
-			"elements": [
-				{
-					"type": "button",
-					"text": {
-						"type": "plain_text",
-						"emoji": true,
-						"text": "Add to Sheet"
-					},
-					"style": "primary",
-					"value": `${mid}`
-				},
-				{
-					"type": "button",
-					"text": {
-						"type": "plain_text",
-						"emoji": true,
-						"text": "Decline"
-					},
-					"style": "danger",
-					"value": "decline"
+			{
+				"type": "header",
+				"text": {
+					"type": "plain_text",
+					"text": "Time Submission",
+					"emoji": true
 				}
-			]
-		},
-		{
-			"type": "divider"
-		}
-	]
+			},
+			{
+				"type": "section",
+				"text": {
+					"type": "mrkdwn",
+					"text": `>>>*<@${uid}>* submitted *${timeArg}* for activity\n\`${activity}\``
+				}
+			},
+			{
+				"type": "actions",
+				"elements": [
+					{
+						"type": "button",
+						"text": {
+							"type": "plain_text",
+							"emoji": true,
+							"text": "Add to Sheet"
+						},
+						"style": "primary",
+						"value": `accept,${mid}`
+					},
+					{
+						"type": "button",
+						"text": {
+							"type": "plain_text",
+							"emoji": true,
+							"text": "Decline w/ Message"
+						},
+						"value": `message,${mid}`
+					},
+					{
+						"type": "button",
+						"text": {
+							"type": "plain_text",
+							"emoji": true,
+							"text": "Decline"
+						},
+						"style": "danger",
+						"value": "decline"
+					}
+				]
+			},
+			{
+				"type": "divider"
+			}
+		]
+
+
+
+
+
+
 }
+
+export const sendDeclineMessageModal = (name,hours,activity,ts,channel,rid)=>{
+    return {
+        "type":"modal",
+		"private_metadata":`decline_message,${ts},${channel},${rid}`,
+        "title": {
+            "type": "plain_text",
+            "text": "Decline Time Request",
+            "emoji": true
+        },
+        "submit": {
+            "type": "plain_text",
+            "text": "Decline and Send",
+            "emoji": true
+        },
+        "type": "modal",
+        "close": {
+            "type": "plain_text",
+            "text": "Cancel",
+            "emoji": true
+        },
+        "blocks": [
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": `_*${name}*_ submitted *${hours} hours* for activity\n\n>_\`\`\`${activity}\`\`\`_`
+                }
+            },
+            {
+                "type": "divider"
+            },
+            {
+                "type": "input",
+				"block_id": "message",
+                "element": {
+                    "type": "plain_text_input",
+                    "multiline": true,
+                    "action_id": "input"
+                },
+                "label": {
+                    "type": "plain_text",
+                    "text": "Decline and Send Message to Micah Powch",
+                    "emoji": true
+                }
+            }
+        ]
+    }
+}
+
 
 export const addedFooter = {
 	"type": "section",
@@ -200,4 +327,21 @@ export const declinedFooter = {
 		"type": "mrkdwn",
 		"text": "*_:x: DECLINED :x:_*"
 	}
+}
+
+export const declinedWithMessage = (message)=>{
+	return [{
+			"type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": "*_:x: DECLINED WITH MESSAGE: :x:_*"
+			}
+		},
+		{
+			"type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": `>\`${message}\``
+			}
+		}]
 }

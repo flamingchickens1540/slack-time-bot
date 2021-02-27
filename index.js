@@ -6,8 +6,8 @@ import http from 'http';
 import https from 'https';
 // const {WebClient} = require('@slack/web-api');
 // const{createEventAdapter} = require('@slack/events-api')
-import { bot_port, slash_port, log_modal, getSubmittedDm, getSubmittedDmHrsAndMins, json_data_path, getRequestBlockList, addedFooter, declinedFooter, max_row, name_column, hours_column, hours_sheet_id, getAcceptedDm, getDeclinedDm, dmRejection, initing } from './consts.js'
-import { secret, token } from './slack_secrets.js'
+import { sendDeclineMessageModal, bot_port, slash_port, log_modal, getSubmittedDm, getSubmittedDmHrsAndMins, json_data_path, getRequestBlockList, addedFooter, declinedFooter, max_row, name_column, hours_column, hours_sheet_id, getAcceptedDm, getDeclinedDm, dmRejection, initing, declinedWithMessage, getDeclinedMessageDM } from './consts.js'
+import { signin_secret, token } from './slack_secrets.js'
 import { existsSync, readFile, readFileSync, writeFile } from 'fs'
 
 import { promisify } from 'util'
@@ -51,7 +51,7 @@ let sheet;
 
 ///////////////// INIT SLACK 
 
-const events = createEventAdapter(secret);
+const events = createEventAdapter(signin_secret);
 const post = new WebClient(token);
 let beeScript;
 let fizz = false;
@@ -194,7 +194,7 @@ const slashServer = http.createServer(async (request, response) => {
             console.log('Partial body: ' + '\n' + body)
         })
 
-        request.on('end', async (data)=>{
+        request.on('end', async (data) => {
             try {
 
                 console.log(`full body: ${body}`)
@@ -217,7 +217,7 @@ const slashServer = http.createServer(async (request, response) => {
                 if ('payload' in requestDict) {
                     // response.writeHead(200,{'Content-type':'application/json'});
                     let real_json = JSON.parse(requestDict['payload']);
-                    //console.log(real_json)
+                    console.log(real_json)
 
 
                     // const data = JSON.stringify({
@@ -277,18 +277,48 @@ const slashServer = http.createServer(async (request, response) => {
 
                         // http.request()
                     } else if (real_json['type'] == 'view_submission') {
-                        const channelId = real_json['user']['id'];
-                        let hoursInput = real_json['view']['state']['values']['hours']['hours']['value'];
-                        if (isNaN(hoursInput)) { return }
-                        const hours = parseFloat(hoursInput);
-                        const task = real_json['view']['state']['values']['task']['task']['value']
-                        const blks = getSubmittedDm(hours, task)
-                        try {
-                            let boi = await post.chat.postMessage({ channel: channelId, text: blks })
-                            //console.log(boi);
-                        } catch (e) { console.log(e) }
-                        handleHoursRequest(channelId, hours, 0, task)
+                        if(real_json.view.private_metadata === "time_submission") {
+                            const channelId = real_json['user']['id'];
+                            let hoursInput = real_json['view']['state']['values']['hours']['hours']['value'];
+                            if (isNaN(hoursInput)) { return }
+                            const hours = parseFloat(hoursInput);
+                            const task = real_json['view']['state']['values']['task']['task']['value']
+                            const blks = getSubmittedDm(hours, task)
+                            try {
+                                let boi = await post.chat.postMessage({ channel: channelId, text: blks })
+                                //console.log(boi);
+                            } catch (e) { console.log(e) }
+                            handleHoursRequest(channelId, hours, 0, task)
+                        } else {
+                            let bits = real_json.view.private_metadata.split(",");
 
+                            if(bits[0] === "decline_message") {
+                                let oldBlocks;
+                                try{oldBlocks = (await post.conversations.history({
+                                    token: token,
+                                    channel: bits[2],
+                                    latest: bits[1],
+                                    inclusive: true,
+                                    limit: 1
+                                })).messages[0].blocks;} catch(err) {console.log(err)}
+
+                                try {
+                                    post.chat.update({
+                                        channel: bits[2],
+                                        ts: bits[1],
+                                        blocks: [oldBlocks[0], oldBlocks[1]].concat(declinedWithMessage(real_json.view.state.values.message.input.value),{"type": "divider"})
+                                    })
+                                } catch (err) { console.log(err) }
+                                try{
+                                    let metaData = DATA.e[bits[3]]
+                                    post.chat.postMessage({
+                                        channel:metaData.userId,
+                                        text:getDeclinedMessageDM(DATA.myLittlePogchamp,metaData.time,metaData.activity,real_json.view.state.values.message.input.value)
+                                    })
+                                } catch (err) {console.log(err)}
+                            }
+
+                        }
                     } else if (real_json['type'] == 'block_actions') {
 
                         let ts = real_json['message']['ts'];
@@ -310,23 +340,36 @@ const slashServer = http.createServer(async (request, response) => {
                             } catch (err) { console.log(err) }
                             // if(dmRejection){post.chat.postMessage({channel: DATA['e'][addId]['userId'], text: getDeclinedDm(DATA['myLittlePogchamp'],DATA['e'][addId]['time'],DATA['e'][addId]['activity'])})}
                         } else {
-                            try {
-                                post.chat.update({
-                                    channel: real_json['container']['channel_id'],
-                                    ts: ts,
-                                    blocks: [oldBlocks[0], oldBlocks[1], addedFooter,
-                                    {
-                                        "type": "divider"
-                                    }]
-                                })
-                            } catch (err) { console.log(err) }
+                            let bits = addId.split(",")
+                            if (bits[0] === "accept") {
+                                addId = bits[1]
+                                try {
+                                    post.chat.update({
+                                        channel: real_json['container']['channel_id'],
+                                        ts: ts,
+                                        blocks: [oldBlocks[0], oldBlocks[1], addedFooter,
+                                        {
+                                            "type": "divider"
+                                        }]
+                                    })
+                                } catch (err) { console.log(err) }
 
-                            // INTERFACE WITH GOOGLE API
-                            // parseInt(real_json['actions'][0]['value'])
-                            post.chat.postMessage({ channel: DATA['e'][addId]['userId'], text: getAcceptedDm(DATA['myLittlePogchamp'], DATA['e'][addId]['time'], DATA['e'][addId]['activity']) })
-                            addhours(DATA['e'][addId]['name'], DATA['e'][addId]['time'])
-                            delete DATA['e'][addId]
-                        }
+                                // INTERFACE WITH GOOGLE API
+                                // parseInt(real_json['actions'][0]['value'])
+                                post.chat.postMessage({ channel: DATA['e'][addId]['userId'], text: getAcceptedDm(DATA['myLittlePogchamp'], DATA['e'][addId]['time'], DATA['e'][addId]['activity']) })
+                                addhours(DATA['e'][addId]['name'], DATA['e'][addId]['time'])
+                                delete DATA['e'][addId]
+                            } else if(bits[0] === "message") {
+                                let rid = bits[1]
+                                let requestInfo = DATA['e'][rid]
+                                try {
+                                    post.views.open({
+                                        trigger_id: real_json['trigger_id'],
+                                        view: sendDeclineMessageModal(requestInfo.name,requestInfo.time,requestInfo.activity,ts,real_json.container.channel_id,rid)
+                                    })
+                                } catch (err) { console.log(err) }
+                            }
+                        } 
 
 
 
@@ -394,6 +437,9 @@ const slashServer = http.createServer(async (request, response) => {
 
     }
 });
+
+
+
 
 slashServer.listen(slash_port);
 
