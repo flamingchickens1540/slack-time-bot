@@ -263,6 +263,32 @@ export const getRequestBlockList = (uid,hrs,mins,activity,mid)=>{
 
 }
 
+export const pendingRequestsMessageBlocks = (countList)=>{
+
+	let list = ""
+	countList.forEach(person => {
+		list += `• ${person.name} (${person.count})\n`
+	});
+
+	return [
+		{
+			"type": "header",
+			"text": {
+				"type": "plain_text",
+				"text": "Today's Pending Time Requests:",
+				"emoji": true
+			}
+		},
+		{
+			"type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": `>>>${list}`
+			}
+		}
+	]
+}
+
 export const sendDeclineMessageModal = (name,hours,activity,ts,channel,rid)=>{
     return {
         "type":"modal",
