@@ -189,7 +189,7 @@ const sendPendingPing = async () => {
     })
 }
 
-sendPendingPing()
+// sendPendingPing()
 
 new CronJob('1 30 9 * * *', async () => { console.log("poggers!!!") }, null, true, 'America/Los_Angeles').start()
 console.log("Cron Job Started!")
