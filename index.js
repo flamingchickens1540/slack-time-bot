@@ -6,7 +6,7 @@ import http from 'http';
 import https from 'https';
 // const {WebClient} = require('@slack/web-api');
 // const{createEventAdapter} = require('@slack/events-api')
-import { sendDeclineMessageModal,getTimeChartSpecs, bot_port, slash_port, log_modal, getSubmittedDm, getSubmittedDmHrsAndMins, json_data_path, getRequestBlockList, addedFooter, declinedFooter, max_row, name_column, hours_column, hours_sheet_id, getAcceptedDm, getDeclinedDm, dmRejection, initing, declinedWithMessage, getDeclinedMessageDM, pendingRequestsMessageBlocks, json_hours_record_path, total_hours_column, global_hours_label_column, global_hours_value_column } from './consts.js'
+import { sendDeclineMessageModal, getTimeChartSpecs, bot_port, slash_port, log_modal, getSubmittedDm, getSubmittedDmHrsAndMins, json_data_path, getRequestBlockList, addedFooter, declinedFooter, max_row, name_column, hours_column, hours_sheet_id, getAcceptedDm, getDeclinedDm, dmRejection, initing, declinedWithMessage, getDeclinedMessageDM, pendingRequestsMessageBlocks, json_hours_record_path, total_hours_column, global_hours_label_column, global_hours_value_column } from './consts.js'
 import { signin_secret, token } from './slack_secrets.js'
 import { existsSync, readFile, readFileSync, writeFile, writeFileSync } from 'fs'
 
@@ -66,10 +66,10 @@ let googleDriveAuthed = false;
 
 let JSONfn = {}
 
-JSONfn.stringify = (obj)=>{
-    return JSON.stringify(obj,function(key, value){
-            return (typeof value === 'function' ) ? '' + value : value;
-        });
+JSONfn.stringify = (obj) => {
+    return JSON.stringify(obj, function (key, value) {
+        return (typeof value === 'function') ? '' + value : value;
+    });
 }
 
 (async () => {
@@ -104,7 +104,7 @@ async function addhours(name, hours) {
 let hours_record
 
 const recordHours = async () => {
-    if(!googleDriveAuthed) { return }
+    if (!googleDriveAuthed) { return }
     if (!existsSync(json_hours_record_path)) {
         writeFileSync(json_hours_record_path, JSON.stringify({ data: {} }))
     }
@@ -120,12 +120,12 @@ const recordHours = async () => {
             const hours_cell = sheet.getCell(y, total_hours_column)
             if (!(hours_cell.value == null || hours_cell.value == "")) {
                 if (!(name_cell.value in hours_record.data)) { hours_record.data[name_cell.value] = [] }
-                hours_record.data[name_cell.value].push({date: new Date(), hours: hours_cell.value})
+                hours_record.data[name_cell.value].push({ date: new Date(), hours: hours_cell.value })
             }
         } else if (cum_label_cell.value === "Total") {
             const cum_value_cell = sheet.getCell(y, global_hours_value_column)
             if (!("total" in hours_record.data)) { hours_record.data["total"] = [] }
-            hours_record.data.total.push({date: new Date(), hours: cum_value_cell.value})
+            hours_record.data.total.push({ date: new Date(), hours: cum_value_cell.value })
         }
     }
     writeFileSync(json_hours_record_path, JSON.stringify(hours_record))
@@ -135,7 +135,7 @@ const recordHours = async () => {
 new CronJob('0 0 * * *', recordHours, {
     scheduled: true,
     timezone: "America/Los_Angeles"
-  }).start()
+}).start()
 
 
 
@@ -186,75 +186,83 @@ const atCommands = {
             console.log("UPDATED!")
         }
         console.log('run!')
-    }, 'graphme': async (event)=> {
+    }, 'graphme': async (event) => {
         console.log("run")
-        if(existsSync(json_hours_record_path)) {
-            if(hours_record == null) {hours_record = JSON.parse(readFileSync(json_hours_record_path))}
+        if (existsSync(json_hours_record_path)) {
+            if (hours_record == null) { hours_record = JSON.parse(readFileSync(json_hours_record_path)) }
             let hours_as_data = []
 
-            if(event.text.split(' ').includes('-r')) { await recordHours() }
+            if (event.text.split(' ').includes('-r')) { await recordHours() }
 
-            let requester_name = (await post.users.info({user:event.user})).user.real_name
+            let requester_name = (await post.users.info({ user: event.user })).user.real_name
 
-            
 
-            hours_record.data[requester_name].forEach(entry=>{hours_as_data.push({x:entry.date,y:entry.hours.toFixed(1)})})
 
-            let full_url = `https://quickchart.io/chart?c=${encodeURIComponent(JSONfn.stringify(getTimeChartSpecs(requester_name,hours_as_data)))}&backgroundColor=white`.replace('%22YEET%22',encodeURIComponent("(value,context)=>{return value.y}").replace("\%22",""))
+            hours_record.data[requester_name].forEach(entry => { hours_as_data.push({ x: entry.date, y: entry.hours.toFixed(1) }) })
+
+            let full_url = `https://quickchart.io/chart?c=${encodeURIComponent(JSONfn.stringify(getTimeChartSpecs(requester_name, hours_as_data)))}&backgroundColor=white`.replace('%22YEET%22', encodeURIComponent("(value,context)=>{return value.y}").replace("\%22", ""))
             let short_url = await TinyURL.shorten(full_url)
 
-            post.chat.postMessage({channel: event.channel ,blocks: 
-                
-                [
-                    {
-                        "type": "image",
-                        image_url: short_url,
-                        "alt_text": "inspiration"
-                    }
-                ]    
-                
-               
-            
-            
+            post.chat.postMessage({
+                channel: event.channel, blocks:
+
+                    [
+                        {
+                            "type": "image",
+                            image_url: short_url,
+                            "alt_text": "inspiration"
+                        }
+                    ]
+
+
+
+
             })
         } else {
-            post.chat.postMessage({channel: event.channel, text: ":exclamation:No data has been recorded yet! Try graphing tomorrow... _-abraham lincoln_"}).catch((err)=>{console.log(err)})
+            post.chat.postMessage({ channel: event.channel, text: ":exclamation:No data has been recorded yet! Try graphing tomorrow... _-abraham lincoln_" }).catch((err) => { console.log(err) })
         }
-    }, 'graph': async (event)=> {
+    }, 'graph': async (event) => {
 
-        if(!event.text.split(" ")[2].includes("<@")) { return }
 
-        event.user = event.text.split(" ")[2].replace("<","").replace(">","").replace("@","")
 
-        if(existsSync(json_hours_record_path)) {
-            if(hours_record == null) {hours_record = JSON.parse(readFileSync(json_hours_record_path))}
+        if (existsSync(json_hours_record_path)) {
+            if (hours_record == null) { hours_record = JSON.parse(readFileSync(json_hours_record_path)) }
             let hours_as_data = []
+            let requester_name
 
-            let requester_name = (await post.users.info({user:event.user})).user.real_name
+            if (!event.text.split(" ")[2].includes("<@")) {
+                if (event.text.split(" ")[2] === 'all' || event.text.split(" ")[2] === 'team') {
+                    requester_name = 'total'
+                } else { return }
+            } else {
+                event.user = event.text.split(" ")[2].replace("<", "").replace(">", "").replace("@", "")
+                requester_name = (await post.users.info({ user: event.user })).user.real_name
+            }
 
-            if(requester_name in hours_record.data) {hours_record.data[requester_name].forEach(entry=>{hours_as_data.push({x:entry.date,y:entry.hours.toFixed(1)})})}
-            else {Object.entries(hours_record.data).forEach(entry=>{if(requester_name.includes(entry[0])){entry[1].forEach((entry)=>{hours_as_data.push({x:entry.date,y:entry.hours.toFixed(1)})})}})}
-            
-            
+            if (requester_name in hours_record.data) { hours_record.data[requester_name].forEach(entry => { hours_as_data.push({ x: entry.date, y: entry.hours.toFixed(1) }) }) }
+            else { Object.entries(hours_record.data).forEach(entry => { if (requester_name.includes(entry[0])) { entry[1].forEach((entry) => { hours_as_data.push({ x: entry.date, y: entry.hours.toFixed(1) }) }) } }) }
+
+
             // {hours_record.data[requester_name].forEach(entry=>{hours_as_data.push({x:entry.date,y:entry.hours.toFixed(1)})})}
 
-            
-            post.chat.postMessage({channel: event.channel ,blocks: 
-                
-                [
-                    {
-                        "type": "image",
-                        image_url: `https://quickchart.io/chart?c=${encodeURIComponent(JSONfn.stringify(getTimeChartSpecs(requester_name,hours_as_data)))}&backgroundColor=white`.replace('%22YEET%22',encodeURIComponent("(value,context)=>{return value.y}").replace("\%22","")),
-                        "alt_text": "inspiration"
-                    }
-                ]    
-                
-               
-            
-            
+
+            post.chat.postMessage({
+                channel: event.channel, blocks:
+
+                    [
+                        {
+                            "type": "image",
+                            image_url: `https://quickchart.io/chart?c=${encodeURIComponent(JSONfn.stringify(getTimeChartSpecs(requester_name, hours_as_data)))}&backgroundColor=white`.replace('%22YEET%22', encodeURIComponent("(value,context)=>{return value.y}").replace("\%22", "")),
+                            "alt_text": "inspiration"
+                        }
+                    ]
+
+
+
+
             })
         } else {
-            post.chat.postMessage({channel: event.channel, text: ":exclamation:No data has been recorded yet! Try graphing tomorrow... _-abraham lincoln_"}).catch((err)=>{console.log(err)})
+            post.chat.postMessage({ channel: event.channel, text: ":exclamation:No data has been recorded yet! Try graphing tomorrow... _-abraham lincoln_" }).catch((err) => { console.log(err) })
         }
     }
 };
