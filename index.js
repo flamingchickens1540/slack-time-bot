@@ -6,9 +6,9 @@ import http from 'http';
 import https from 'https';
 // const {WebClient} = require('@slack/web-api');
 // const{createEventAdapter} = require('@slack/events-api')
-import { sendDeclineMessageModal, bot_port, slash_port, log_modal, getSubmittedDm, getSubmittedDmHrsAndMins, json_data_path, getRequestBlockList, addedFooter, declinedFooter, max_row, name_column, hours_column, hours_sheet_id, getAcceptedDm, getDeclinedDm, dmRejection, initing, declinedWithMessage, getDeclinedMessageDM, pendingRequestsMessageBlocks } from './consts.js'
+import { sendDeclineMessageModal,getTimeChartSpecs, bot_port, slash_port, log_modal, getSubmittedDm, getSubmittedDmHrsAndMins, json_data_path, getRequestBlockList, addedFooter, declinedFooter, max_row, name_column, hours_column, hours_sheet_id, getAcceptedDm, getDeclinedDm, dmRejection, initing, declinedWithMessage, getDeclinedMessageDM, pendingRequestsMessageBlocks, json_hours_record_path, total_hours_column, global_hours_label_column, global_hours_value_column } from './consts.js'
 import { signin_secret, token } from './slack_secrets.js'
-import { existsSync, readFile, readFileSync, writeFile } from 'fs'
+import { existsSync, readFile, readFileSync, writeFile, writeFileSync } from 'fs'
 
 import { promisify } from 'util'
 import { setupMaster } from "cluster";
@@ -61,13 +61,26 @@ let fizz = false;
 
 /////////////////// INIT GOOGLE DRIVE
 
+let googleDriveAuthed = false;
+
+let JSONfn = {}
+
+JSONfn.stringify = (obj)=>{
+    return JSON.stringify(obj,function(key, value){
+            return (typeof value === 'function' ) ? '' + value : value;
+        });
+}
+
 (async () => {
     const google_client_secret = JSON.parse(readFileSync('./client_secret.json'))
     const doc = await new GoogleSpreadsheet(hours_sheet_id)
     await doc.useServiceAccountAuth(google_client_secret)
     await doc.loadInfo()
     sheet = doc.sheetsByIndex[0]
-})();
+})().then(async () => {
+    googleDriveAuthed = true;
+    recordHours();
+})
 
 async function addhours(name, hours) {
     await sheet.loadCells({ startRowIndex: 0, endRowIndex: max_row + 1, startColumnIndex: name_column, endColumnIndex: hours_column + 1 })
@@ -87,12 +100,42 @@ async function addhours(name, hours) {
 }
 
 
+////// COLLECT HOURS DATA
+let hours_record
+
+const recordHours = async () => {
+    if(!googleDriveAuthed) { return }
+    if (!existsSync(json_hours_record_path)) {
+        writeFileSync(json_hours_record_path, JSON.stringify({ data: {} }))
+    }
+    hours_record = JSON.parse(readFileSync(json_hours_record_path))
+    await sheet.loadCells({ startRowIndex: 0, endRowIndex: max_row + 1, startColumnIndex: name_column, endColumnIndex: total_hours_column + 1 })
+    for (let y = 0; y < max_row; y++) {
+        // console.log(y)
+        const name_cell = sheet.getCell(y, name_column)
+        const cum_label_cell = sheet.getCell(y, global_hours_label_column)
 
 
+        if (name_cell.value != null && name_cell.value != "") {
+            const hours_cell = sheet.getCell(y, total_hours_column)
+            if (!(hours_cell.value == null || hours_cell.value == "")) {
+                if (!(name_cell.value in hours_record.data)) { hours_record.data[name_cell.value] = [] }
+                hours_record.data[name_cell.value].push({date: new Date(), hours: hours_cell.value})
+            }
+        } else if (cum_label_cell.value === "Total") {
+            const cum_value_cell = sheet.getCell(y, global_hours_value_column)
+            if (!("total" in hours_record.data)) { hours_record.data["total"] = [] }
+            hours_record.data.total.push({date: new Date(), hours: cum_value_cell.value})
+        }
+    }
+    writeFileSync(json_hours_record_path, JSON.stringify(hours_record))
+}
 
-
-
-
+// Record hour data every midnight
+new CronJob('0 0 * * *', recordHours, {
+    scheduled: true,
+    timezone: "America/Los_Angeles"
+  }).start()
 
 
 
@@ -143,6 +186,69 @@ const atCommands = {
             console.log("UPDATED!")
         }
         console.log('run!')
+    }, 'graphme': async (event)=> {
+        console.log("run")
+        if(existsSync(json_hours_record_path)) {
+            if(hours_record == null) {hours_record = JSON.parse(readFileSync(json_hours_record_path))}
+            let hours_as_data = []
+
+            let requester_name = (await post.users.info({user:event.user})).user.real_name
+
+            hours_record.data[requester_name].forEach(entry=>{hours_as_data.push({x:entry.date,y:entry.hours.toFixed(1)})})
+            
+            post.chat.postMessage({channel: event.channel ,blocks: 
+                
+                [
+                    {
+                        "type": "image",
+                        image_url: `https://quickchart.io/chart?c=${encodeURIComponent(JSONfn.stringify(getTimeChartSpecs(requester_name,hours_as_data)))}&backgroundColor=white`.replace('%22YEET%22',encodeURIComponent("(value,context)=>{return value.y}").replace("\%22","")),
+                        "alt_text": "inspiration"
+                    }
+                ]    
+                
+               
+            
+            
+            })
+        } else {
+            post.chat.postMessage({channel: event.channel, text: ":exclamation:No data has been recorded yet! Try graphing tomorrow... _-abraham lincoln_"}).catch((err)=>{console.log(err)})
+        }
+    }, 'graph': async (event)=> {
+
+        if(!event.text.split(" ")[2].includes("<@")) { return }
+
+        event.user = event.text.split(" ")[2].replace("<","").replace(">","").replace("@","")
+
+        if(existsSync(json_hours_record_path)) {
+            if(hours_record == null) {hours_record = JSON.parse(readFileSync(json_hours_record_path))}
+            let hours_as_data = []
+
+            let requester_name = (await post.users.info({user:event.user})).user.real_name
+
+            if(requester_name in hours_record.data) {hours_record.data[requester_name].forEach(entry=>{hours_as_data.push({x:entry.date,y:entry.hours.toFixed(1)})})}
+            else {Object.entries(hours_record.data).forEach(entry=>{if(requester_name.contains(entry[0])){entry[1].forEach((entry)=>{hours_as_data.push({x:entry.date,y:entry.hours.toFixed(1)})})}})}
+            
+            
+            {hours_record.data[requester_name].forEach(entry=>{hours_as_data.push({x:entry.date,y:entry.hours.toFixed(1)})})}
+
+            
+            post.chat.postMessage({channel: event.channel ,blocks: 
+                
+                [
+                    {
+                        "type": "image",
+                        image_url: `https://quickchart.io/chart?c=${encodeURIComponent(JSONfn.stringify(getTimeChartSpecs(requester_name,hours_as_data)))}&backgroundColor=white`.replace('%22YEET%22',encodeURIComponent("(value,context)=>{return value.y}").replace("\%22","")),
+                        "alt_text": "inspiration"
+                    }
+                ]    
+                
+               
+            
+            
+            })
+        } else {
+            post.chat.postMessage({channel: event.channel, text: ":exclamation:No data has been recorded yet! Try graphing tomorrow... _-abraham lincoln_"}).catch((err)=>{console.log(err)})
+        }
     }
 };
 
@@ -153,7 +259,7 @@ events.on('app_mention', (event) => {
     if (textSplit[1] in atCommands) {
         atCommands[textSplit[1]](event);
     }
-    //console.log("sent!");
+    // console.log("sent!");
 });
 
 events.on('ready', () => {
@@ -164,7 +270,8 @@ events.start(bot_port).then(() => {
     console.log(`event listener started on port ${bot_port}`)
 })
 
-
+// console.log(new Date())
+// console.log(Date.now())
 
 
 //START WORKING: 9:20
@@ -175,7 +282,7 @@ events.start(bot_port).then(() => {
 const sendPendingPing = async () => {
     let pendingPeople = {};
     let pendingPeopleList = [];
-    if (DATA.e == null || DATA.e.length == 0) { return }
+    if (DATA.e == null || Object.entries(DATA.e) == null || Object.entries(DATA.e).length == 0) { return }
     Object.values(DATA.e).forEach(request => {
         if (pendingPeople[request.name] == null) {
             pendingPeople[request.name] = 0
@@ -191,7 +298,9 @@ const sendPendingPing = async () => {
 
 // sendPendingPing()
 
-new CronJob('1 30 9 * * *', async () => { console.log("poggers!!!") }, null, true, 'America/Los_Angeles').start()
+new CronJob('1 30 9 * * *', sendPendingPing, null, true, 'America/Los_Angeles').start()
+// new CronJob('* * * * * *', sendPendingPing, null, true, 'America/Los_Angeles').start()
+
 console.log("Cron Job Started!")
 
 
@@ -380,8 +489,8 @@ const slashServer = http.createServer(async (request, response) => {
 
                                 // INTERFACE WITH GOOGLE API
                                 // parseInt(real_json['actions'][0]['value'])
-                                post.chat.postMessage({ channel: DATA['e'][addId]['userId'], text: getAcceptedDm(DATA['myLittlePogchamp'], DATA['e'][addId]['time'], DATA['e'][addId]['activity']) })
                                 addhours(DATA['e'][addId]['name'], DATA['e'][addId]['time'])
+                                await post.chat.postMessage({ channel: DATA['e'][addId]['userId'], text: getAcceptedDm(DATA['myLittlePogchamp'], DATA['e'][addId]['time'], DATA['e'][addId]['activity']) })
                                 delete DATA['e'][addId]
                                 writeJSON()
                             } else if (bits[0] === "message") {
@@ -404,6 +513,7 @@ const slashServer = http.createServer(async (request, response) => {
 
 
                 } else if (requestDict['command'] === '/log') {
+                    console.log(requestDict)
                     let mins = 0, hours = 0, actStart = 0;
                     let args = requestDict['text'].split(" ")
                     if (args.length === 0 || args[0] === '') {
@@ -439,10 +549,12 @@ const slashServer = http.createServer(async (request, response) => {
                         let msg_txt = getSubmittedDmHrsAndMins(hours, mins, activity);
                         let channelId = requestDict['channel_id'];
                         let userId = requestDict['user_id'];
-                        try {
-                            let boi = await post.chat.postEphemeral({ channel: channelId, text: msg_txt, user: userId })
-                            //console.log(boi);
-                        } catch (e) { console.log(e) }
+                        if (!(requestDict.channel_name === "directmessage")) {
+                            try {
+                                let boi = await post.chat.postEphemeral({ channel: channelId, text: msg_txt, user: userId })
+                                //console.log(boi);
+                            } catch (e) { console.log(e) }
+                        }
                         try {
                             let boi = await post.chat.postMessage({ channel: userId, text: msg_txt })
                             //console.log(boi);

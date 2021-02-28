@@ -1,11 +1,15 @@
 export const bot_port = 8000;
 export const slash_port = process.env.PORT || 5000;
 export const json_data_path = 'data.json'
+export const json_hours_record_path = "hours.json" 
 export const hours_column = 4
+export const total_hours_column = 5
+export const global_hours_label_column = 4
+export const global_hours_value_column = 5
 export const name_column = 0;
 export const max_row = 41;
-// export const hours_sheet_id = '10AcplDpfbXlECQYaFuTFcIeN2U8raP9XysuN3e31js0'
-export const hours_sheet_id = '1HrqjjiX9Hghol3ugSFyL8Hslag59cUP88hAgJHW-TUU'
+// export const hours_sheet_id = '10AcplDpfbXlECQYaFuTFcIeN2U8raP9XysuN3e31js0' // REAL SHEET
+export const hours_sheet_id = '1HrqjjiX9Hghol3ugSFyL8Hslag59cUP88hAgJHW-TUU' // TEST SHEET
 export const dmRejection = true;
 export const initing = true;
 
@@ -92,20 +96,28 @@ export const getSubmittedBlocks = (hours,activity)=>{
 export const getSubmittedDm = (hours,activity)=>{
 	let s = 's'
 	if(hours===1) {s = ''}
-	return `:clock2: You submitted *${hours} hour${s}* for activity:\n>\`${activity}\``
+	// return `:clock2: You submitted *${hours} hour${s}* for activity:\n>\`${activity}\``
+	return `:clock2: You submitted *${hours} hour${s}* :clock7:\n>>>:person_climbing: *Activity:*\n\`${activity}\``
+
 	// return `:white_check_mark: You submitted *${hours} hours* for activity:\n\`\`\`${activity}\`\`\``
 	// return `:clock2: You submitted \'${hours}\' hours for activity \'${activity}\'`
 // 
 }
 
 export const getAcceptedDm = (pigChumpId, hours,activity)=>{
-	return `:white_check_mark: *<@${pigChumpId}>* accepted *${hours} hours* for activity:\n>\`${activity}\``
+	// return `:white_check_mark: *<@${pigChumpId}>* accepted *${hours} hours* for activity:\n>\`${activity}\``
+	return `:white_check_mark: *<@${pigChumpId}>* accepted *${hours} hours :white_check_mark:*\n>>>:person_climbing: *Activity:*\n\`${activity}\`
+	`
 }
 export const getDeclinedDm = (pigChumpId, hours,activity)=>{
+	// return `:x: *<@${pigChumpId}>* declined *${hours} hours* for activity:\n>\`${activity}\``
 	return `:x: *<@${pigChumpId}>* declined *${hours} hours* for activity:\n>\`${activity}\``
+
 }
 export const getDeclinedMessageDM = (uid,hours,activity,message)=>{
-	return  `:x: *<@${uid}>* declined *${hours} hours* for activity::x:\n>\`${activity}\`\n:loudspeaker: *Message:*\n>\`${message}\``
+	// return  `:x: *<@${uid}>* declined *${hours} hours* for activity:\n>>>\`${activity}\`\n:loudspeaker: *Message:*\n\`${message}\``
+	return  `:x: *<@${uid}>* declined *${hours} hours* :x:\n>>>:person_climbing: *Activity:*\n\`${activity}\`\n:loudspeaker: *Message:*\n\`${message}\``
+
 }
 
 
@@ -115,11 +127,16 @@ export const getSubmittedDmHrsAndMins = (hrs,mins,activity)=>{
 	let sm = 's'
 	if(mins===1) {sm = ''}
 	if(hrs===0) {
-		return `:clock2: You submitted *${mins} minute${sm}* for activity:\n>\`${activity}\``
+		// return `:clock2: You submitted *${mins} minute${sm}* for activity:\n>\`${activity}\``
+		return `:clock6: You submitted *${mins} minute${sm}* :clock1030:\n>>>:person_climbing: *Activity:*\n\`${activity}\``
+		
 	} else if(mins===0) {
-		return `:clock2: You submitted *${hrs} hour${s}* for activity:\n>\`${activity}\``
+		// return `:clock2: You submitted *${hrs} hour${s}* for activity:\n>\`${activity}\``
+		return `:clock8: You submitted *${hrs} hour${s}* :clock330:\n>>>:person_climbing: *Activity:*\n\`${activity}\``
 	} else {
-		return `:clock2: You submitted *${hrs} hour${s}, ${mins} minute${sm}* for activity:\n>\`${activity}\``
+		// return `:clock2: You submitted *${hrs} hour${s}, ${mins} minute${sm}* for activity:\n>\`${activity}\``
+		return `:clock11: You submitted *${hrs} hour${s}, ${mins} minute${sm}* :clock5:\n>>>:person_climbing: *Activity:*\n\`${activity}\``
+		
 	}
 	
 	// return `:white_check_mark: You submitted *${hours} hours* for activity:\n\`\`\`${activity}\`\`\``
@@ -237,17 +254,18 @@ export const getRequestBlockList = (uid,hrs,mins,activity,mid)=>{
 							"emoji": true,
 							"text": "Decline w/ Message"
 						},
+						style:"danger",
 						"value": `message,${mid}`
-					},
-					{
-						"type": "button",
-						"text": {
-							"type": "plain_text",
-							"emoji": true,
-							"text": "Decline"
-						},
-						"style": "danger",
-						"value": "decline"
+					// },
+					// {
+					// 	"type": "button",
+					// 	"text": {
+					// 		"type": "plain_text",
+					// 		"emoji": true,
+					// 		"text": "Decline"
+					// 	},
+					// 	"style": "danger",
+					// 	"value": "decline"
 					}
 				]
 			},
@@ -371,3 +389,60 @@ export const declinedWithMessage = (message)=>{
 			}
 		}]
 }
+
+
+export const getTimeChartSpecs = (name,dataList)=>{
+	console.log(dataList)
+	return {
+		type: 'line',
+		 
+		data: {
+		  datasets: [{
+			
+			// label: 'Hours',
+			data: dataList,
+			lineTension: 1,
+			cubicInterpolationMode: "monotone",
+			borderWidth: 5,
+			fill: false,
+			pointRadius: 5,
+			// steppedLine: false,
+			borderColor:"#29d9b9",
+			pointBorderWidth:2	,
+			pointBorderColor:"white",
+			pointBackgroundColor:"#00d1ac",
+			// pointHitRadius:2,
+		  }]
+		},
+	   options: {
+		 plugins: {
+			datalabels: {
+			  color:'#29d9b9',
+			  font: {size:15,weight:'bold',familly:''},
+		   //   opacity:.7,
+			  display: true,
+			  align: 'bottom',
+				display: 'auto',
+			 backgroundColor: 'white',
+			//   borderRadius: 1000,
+			  formatter: "YEET"
+			},
+		  },
+			 legend: {display:false},
+			title:{display:true,text:`${name}\'s Cumulative Hours from ${(new Date(dataList[0].x)).toDateString()} - ${(new Date(dataList[dataList.length-1].x)).toDateString()}`},
+			scales: {
+			  xAxes: [{
+				type: 'time',
+				// distribution: 'linear',
+				time: {
+					unit: 'day',
+				}
+			  }]
+		  }
+	   }
+	  }
+}
+
+
+
+
