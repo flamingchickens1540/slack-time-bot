@@ -79,7 +79,6 @@ JSONfn.stringify = (obj)=>{
     sheet = doc.sheetsByIndex[0]
 })().then(async () => {
     googleDriveAuthed = true;
-    recordHours();
 })
 
 async function addhours(name, hours) {
@@ -226,7 +225,7 @@ const atCommands = {
             let requester_name = (await post.users.info({user:event.user})).user.real_name
 
             if(requester_name in hours_record.data) {hours_record.data[requester_name].forEach(entry=>{hours_as_data.push({x:entry.date,y:entry.hours.toFixed(1)})})}
-            else {Object.entries(hours_record.data).forEach(entry=>{if(requester_name.contains(entry[0])){entry[1].forEach((entry)=>{hours_as_data.push({x:entry.date,y:entry.hours.toFixed(1)})})}})}
+            else {Object.entries(hours_record.data).forEach(entry=>{if(requester_name.includes(entry[0])){entry[1].forEach((entry)=>{hours_as_data.push({x:entry.date,y:entry.hours.toFixed(1)})})}})}
             
             
             {hours_record.data[requester_name].forEach(entry=>{hours_as_data.push({x:entry.date,y:entry.hours.toFixed(1)})})}
