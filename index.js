@@ -191,7 +191,11 @@ const atCommands = {
             if(hours_record == null) {hours_record = JSON.parse(readFileSync(json_hours_record_path))}
             let hours_as_data = []
 
+            if('-r' in event.text.split(' ')) { await recordHours() }
+
             let requester_name = (await post.users.info({user:event.user})).user.real_name
+
+            
 
             hours_record.data[requester_name].forEach(entry=>{hours_as_data.push({x:entry.date,y:entry.hours.toFixed(1)})})
             
