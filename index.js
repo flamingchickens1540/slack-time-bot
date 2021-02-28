@@ -13,6 +13,7 @@ import { existsSync, readFile, readFileSync, writeFile, writeFileSync } from 'fs
 import { promisify } from 'util'
 import { setupMaster } from "cluster";
 import { GoogleSpreadsheet } from "google-spreadsheet";
+import TinyURL from 'tinyurl'
 
 import "cron"
 import { CronJob } from "cron";
@@ -198,13 +199,16 @@ const atCommands = {
             
 
             hours_record.data[requester_name].forEach(entry=>{hours_as_data.push({x:entry.date,y:entry.hours.toFixed(1)})})
-            
+
+            let full_url = `https://quickchart.io/chart?c=${encodeURIComponent(JSONfn.stringify(getTimeChartSpecs(requester_name,hours_as_data)))}&backgroundColor=white`.replace('%22YEET%22',encodeURIComponent("(value,context)=>{return value.y}").replace("\%22",""))
+            let short_url = await TinyURL.shorten(full_url)
+
             post.chat.postMessage({channel: event.channel ,blocks: 
                 
                 [
                     {
                         "type": "image",
-                        image_url: `https://quickchart.io/chart?c=${encodeURIComponent(JSONfn.stringify(getTimeChartSpecs(requester_name,hours_as_data)))}&backgroundColor=white`.replace('%22YEET%22',encodeURIComponent("(value,context)=>{return value.y}").replace("\%22","")),
+                        image_url: short_url,
                         "alt_text": "inspiration"
                     }
                 ]    
