@@ -228,7 +228,7 @@ const atCommands = {
             else {Object.entries(hours_record.data).forEach(entry=>{if(requester_name.includes(entry[0])){entry[1].forEach((entry)=>{hours_as_data.push({x:entry.date,y:entry.hours.toFixed(1)})})}})}
             
             
-            {hours_record.data[requester_name].forEach(entry=>{hours_as_data.push({x:entry.date,y:entry.hours.toFixed(1)})})}
+            // {hours_record.data[requester_name].forEach(entry=>{hours_as_data.push({x:entry.date,y:entry.hours.toFixed(1)})})}
 
             
             post.chat.postMessage({channel: event.channel ,blocks: 
