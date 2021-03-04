@@ -202,22 +202,9 @@ const atCommands = {
 
             let full_url = `https://quickchart.io/chart?c=${encodeURIComponent(JSONfn.stringify(getTimeChartSpecs(requester_name, hours_as_data)))}&backgroundColor=white`.replace('%22YEET%22', encodeURIComponent("(value,context)=>{return value.y}").replace("\%22", ""))
             let short_url = await TinyURL.shorten(full_url)
+            
+            post.chat.postMessage({ channel: event.channel, blocks: [{"type": "image", image_url: short_url, "alt_text": "inspiration"}]})
 
-            post.chat.postMessage({
-                channel: event.channel, blocks:
-
-                    [
-                        {
-                            "type": "image",
-                            image_url: short_url,
-                            "alt_text": "inspiration"
-                        }
-                    ]
-
-
-
-
-            })
         } else {
             post.chat.postMessage({ channel: event.channel, text: ":exclamation:No data has been recorded yet! Try graphing tomorrow... _-abraham lincoln_" }).catch((err) => { console.log(err) })
         }
@@ -233,6 +220,7 @@ const atCommands = {
             if (!event.text.split(" ")[2].includes("<@")) {
                 if (event.text.split(" ")[2] === 'all' || event.text.split(" ")[2] === 'team') {
                     requester_name = 'total'
+                    
                 } else { return }
             } else {
                 event.user = event.text.split(" ")[2].replace("<", "").replace(">", "").replace("@", "")
@@ -245,22 +233,11 @@ const atCommands = {
 
             // {hours_record.data[requester_name].forEach(entry=>{hours_as_data.push({x:entry.date,y:entry.hours.toFixed(1)})})}
 
+            let full_url = `https://quickchart.io/chart?c=${encodeURIComponent(JSONfn.stringify(getTimeChartSpecs(requester_name, hours_as_data)))}&backgroundColor=white`.replace('%22YEET%22', encodeURIComponent("(value,context)=>{return value.y}").replace("\%22", ""))
+            let short_url = await TinyURL.shorten(full_url)
 
-            post.chat.postMessage({
-                channel: event.channel, blocks:
+            post.chat.postMessage({ channel: event.channel, blocks: [{"type": "image", image_url: short_url, "alt_text": "inspiration"}]})
 
-                    [
-                        {
-                            "type": "image",
-                            image_url: `https://quickchart.io/chart?c=${encodeURIComponent(JSONfn.stringify(getTimeChartSpecs(requester_name, hours_as_data)))}&backgroundColor=white`.replace('%22YEET%22', encodeURIComponent("(value,context)=>{return value.y}").replace("\%22", "")),
-                            "alt_text": "inspiration"
-                        }
-                    ]
-
-
-
-
-            })
         } else {
             post.chat.postMessage({ channel: event.channel, text: ":exclamation:No data has been recorded yet! Try graphing tomorrow... _-abraham lincoln_" }).catch((err) => { console.log(err) })
         }
