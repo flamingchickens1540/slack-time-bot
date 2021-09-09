@@ -46,7 +46,7 @@ export const log_modal = {
 			},
 			"label": {
 				"type": "plain_text",
-				"text": "Hours Spent",
+				"text": ":clock9: Hours Spent",
 				"emoji": true
 			}
 		},
@@ -60,7 +60,7 @@ export const log_modal = {
 			},
 			"label": {
 				"type": "plain_text",
-				"text": "Activity",
+				"text": ":person_climbing: Activity",
 				"emoji": true
 			}
 		}
