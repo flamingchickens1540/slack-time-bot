@@ -90,7 +90,6 @@ async function addhours(name, hours) {
 
         if (name.includes(name_cell.value) && name_cell.value != "" && name_cell.value != " ") {
             const hours_cell = sheet.getCell(y, hours_column)
-            console.log("BOI!!!!   " + hours_cell.formula)
             if('d'+hours_cell.formula == 'dnull') {
                 if(hours_cell.value) {
                     hours_cell.formula = `=${hours_cell.value}`
@@ -98,8 +97,6 @@ async function addhours(name, hours) {
                     hours_cell.formula = `=`
                 }
             }
-            if(hours_cell.formula == 'null') {console.log(`is "null"`)}
-            console.log("BOI2!!!!   " + hours_cell.formula)
             hours_cell.formula = `${hours_cell.formula}+${parseFloat(hours).toFixed(1)}`
             hours_cell.save()
             return
