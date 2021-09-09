@@ -90,14 +90,15 @@ async function addhours(name, hours) {
 
         if (name.includes(name_cell.value) && name_cell.value != "" && name_cell.value != " ") {
             const hours_cell = sheet.getCell(y, hours_column)
-            if('d'+hours_cell.formula == 'dnull') {
+            let preformula = hours_cell.formula
+            if('d'+preformula == 'dnull') {
                 if(hours_cell.value) {
-                    hours_cell.formula = `=${hours_cell.value}`
+                    preformula = `=${hours_cell.value}`
                 } else {
-                    hours_cell.formula = `=0`
+                    preformula = `=0`
                 }
             }
-            hours_cell.formula = `${hours_cell.formula}+${parseFloat(hours).toFixed(1)}`
+            hours_cell.formula = `${preformula}+${parseFloat(hours).toFixed(1)}`
             hours_cell.save()
             return
         }
