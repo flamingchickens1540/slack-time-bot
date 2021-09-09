@@ -94,7 +94,7 @@ async function addhours(name, hours) {
                 if(hours_cell.value) {
                     hours_cell.formula = `=${hours_cell.value}`
                 } else {
-                    hours_cell.formula = `=`
+                    hours_cell.formula = `=0`
                 }
             }
             hours_cell.formula = `${hours_cell.formula}+${parseFloat(hours).toFixed(1)}`
