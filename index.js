@@ -6,7 +6,7 @@ import http from 'http';
 import https from 'https';
 // const {WebClient} = require('@slack/web-api');
 // const{createEventAdapter} = require('@slack/events-api')
-import { sendDeclineMessageModal, getTimeChartSpecs, bot_port, slash_port, log_modal, getSubmittedDm, getSubmittedDmHrsAndMins, json_data_path, getRequestBlockList, addedFooter, declinedFooter, max_row, name_column, hours_column, hours_sheet_id, getAcceptedDm, getDeclinedDm, dmRejection, initing, declinedWithMessage, getDeclinedMessageDM, pendingRequestsMessageBlocks, json_hours_record_path, total_hours_column, global_hours_label_column, global_hours_value_column } from './consts.js'
+import { sendDeclineMessageModal, getTimeChartSpecs, bot_port, slash_port, log_modal, getSubmittedDm, getSubmittedDmHrsAndMins, json_data_path, getRequestBlockList, addedFooter, declinedFooter, max_row, name_column, hours_column, lab_hours_column, hours_sheet_id, getAcceptedDm, getDeclinedDm, dmRejection, initing, declinedWithMessage, getDeclinedMessageDM, pendingRequestsMessageBlocks, json_hours_record_path, total_hours_column, global_hours_label_column, global_hours_value_column } from './consts.js'
 import { signin_secret, token } from './slack_secrets.js'
 import { existsSync, readFile, readFileSync, writeFile, writeFileSync } from 'fs'
 
@@ -82,6 +82,31 @@ JSONfn.stringify = (obj) => {
     googleDriveAuthed = true;
 })
 
+
+async function addLabHours(name, hours) {
+    await sheet.loadCells({ startRowIndex: 0, endRowIndex: max_row + 1, startColumnIndex: name_column, endColumnIndex: lab_hours_column + 1 })
+    for (let y = 0; y < max_row; y++) {
+        // console.log(y)
+        const name_cell = sheet.getCell(y, name_column)
+
+        if (name.includes(name_cell.value) && name_cell.value != "" && name_cell.value != " ") {
+            const hours_cell = sheet.getCell(y, lab_hours_column)
+            let preformula = hours_cell.formula
+            if('d'+preformula == 'dnull') {
+                if(hours_cell.value) {
+                    preformula = `=${hours_cell.value}`
+                } else {
+                    preformula = `=0`
+                }
+            }
+            hours_cell.formula = `${preformula}+${parseFloat(hours).toFixed(1)}`
+            hours_cell.save()
+            return
+        }
+
+    }
+}
+
 async function addhours(name, hours) {
     await sheet.loadCells({ startRowIndex: 0, endRowIndex: max_row + 1, startColumnIndex: name_column, endColumnIndex: hours_column + 1 })
     for (let y = 0; y < max_row; y++) {
@@ -110,6 +135,7 @@ async function addhours(name, hours) {
 
 ////// COLLECT HOURS DATA
 let hours_record
+
 
 const recordHours = async () => {
     if (!googleDriveAuthed) { return }
@@ -489,7 +515,11 @@ const slashServer = http.createServer(async (request, response) => {
 
                                 // INTERFACE WITH GOOGLE API
                                 // parseInt(real_json['actions'][0]['value'])
-                                addhours(DATA['e'][addId]['name'], DATA['e'][addId]['time'])
+                                if(DATA['e'][addId]['activity'] == 'lab') {
+                                    addLabHours(DATA['e'][addId]['name'], DATA['e'][addId]['time'])
+                                } else {
+                                    addhours(DATA['e'][addId]['name'], DATA['e'][addId]['time'])
+                                }
                                 await post.chat.postMessage({ channel: DATA['e'][addId]['userId'], text: getAcceptedDm(DATA['myLittlePogchamp'], DATA['e'][addId]['time'], DATA['e'][addId]['activity']) })
                                 delete DATA['e'][addId]
                                 writeJSON()

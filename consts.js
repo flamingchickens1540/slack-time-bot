@@ -3,6 +3,7 @@ export const slash_port = 9190;
 export const json_data_path = 'data.json'
 export const json_hours_record_path = "hours.json" 
 export const hours_column = 4
+export const lab_hours_column = 3
 export const total_hours_column = 5
 export const global_hours_label_column = 4
 export const global_hours_value_column = 5
