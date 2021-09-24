@@ -554,8 +554,7 @@ const slashServer = http.createServer(async (request, response) => {
                     } else if (args.length === 1) {
 
                     } else {
-                        if (!isNaN(args[0].slice(0, args[0].length - 1))) {
-                            console.log("sdfdgersdgSDJFHEJGHWEUIAGHERUISGJ STUFFFFFFF")
+                        if (!isNaN(args[0].slice(0, args[0].length - 1)) && args[0].length != 1) {
                             let val = parseFloat(args[0])
                             if (args[0].slice(-1) === 'h') {
                                 hours = val;
@@ -565,7 +564,7 @@ const slashServer = http.createServer(async (request, response) => {
                                 actStart += 1;
                             }
                         }
-                        if (!isNaN(args[1].slice(0, args[1].length - 1))) {
+                        if (!isNaN(args[1].slice(0, args[1].length - 1)) && args[1].length != 1) {
                             let val = parseFloat(args[1])
                             if (args[1].slice(-1) === 'h') {
                                 hours = val;
