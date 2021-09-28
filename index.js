@@ -89,7 +89,7 @@ async function addLabHours(name, hours) {
         // console.log(y)x
         const name_cell = sheet.getCell(y, name_column)
 
-        if (name.toLowerCase().includes(name_cell.value.toLowerCase()) && name_cell.value != "" && name_cell.value != " ") {
+        if (new String(name).toLowerCase().includes(new String(name_cell.value).toLowerCase()) && name_cell.value != "" && name_cell.value != " ") {
             const hours_cell = sheet.getCell(y, lab_hours_column)
             let preformula = hours_cell.formula
             if ('d' + preformula == 'dnull') {
@@ -113,7 +113,7 @@ async function addhours(name, hours) {
         // console.log(y)
         const name_cell = sheet.getCell(y, name_column)
 
-        if (name.toLowerCase().includes(name_cell.value.toLowerCase()) && name_cell.value != "" && name_cell.value != " ") {
+        if (new String(name).toLowerCase().includes(new String(name_cell.value).toLowerCase()) && name_cell.value != "" && name_cell.value != " ") {
             const hours_cell = sheet.getCell(y, hours_column)
             let preformula = hours_cell.formula
             if ('d' + preformula == 'dnull') {
@@ -262,7 +262,7 @@ const atCommands = {
             }
 
             if (requester_name in hours_record.data) { hours_record.data[requester_name].forEach(entry => { hours_as_data.push({ x: entry.date, y: entry.hours.toFixed(1) }) }) }
-            else { Object.entries(hours_record.data).forEach(entry => { if (requester_name.toLowerCase().includes(entry[0].toLowerCase())) { entry[1].forEach((entry) => { hours_as_data.push({ x: entry.date, y: entry.hours.toFixed(1) }) }) } }) }
+            else { Object.entries(hours_record.data).forEach(entry => { if (new String(requester_name).toLowerCase().includes(new String(entry[0]).toLowerCase())) { entry[1].forEach((entry) => { hours_as_data.push({ x: entry.date, y: entry.hours.toFixed(1) }) }) } }) }
 
 
             // {hours_record.data[requester_name].forEach(entry=>{hours_as_data.push({x:entry.date,y:entry.hours.toFixed(1)})})}
