@@ -595,7 +595,7 @@ const slashServer = http.createServer(async (request, response) => {
                         }
                         try {
                             if (hours + mins == 0) {
-                                let boi = await post.chat.postMessage({ channel: channelId, text: ":warning: I just blocked your submission of ZERO hours. Please submit hours in the form: `/log 2h 15m write error messaging for the slack time bot #METAAAAA!!!` :warning: (Make note of spaces/lack of spaces)"})
+                                let boi = await post.chat.postMessage({ channel: userId, text: ":warning: I just blocked your submission of ZERO hours. Please submit hours in the form: `/log 2h 15m write error messaging for the slack time bot #METAAAAA!!!` :warning: (Make note of spaces/lack of spaces)"})
                             } else {
 
                                 let boi = await post.chat.postMessage({ channel: userId, text: msg_txt })
