@@ -86,14 +86,14 @@ JSONfn.stringify = (obj) => {
 async function addLabHours(name, hours) {
     await sheet.loadCells({ startRowIndex: 0, endRowIndex: max_row + 1, startColumnIndex: name_column, endColumnIndex: lab_hours_column + 1 })
     for (let y = 0; y < max_row; y++) {
-        // console.log(y)
+        // console.log(y)x
         const name_cell = sheet.getCell(y, name_column)
 
         if (name.includes(name_cell.value) && name_cell.value != "" && name_cell.value != " ") {
             const hours_cell = sheet.getCell(y, lab_hours_column)
             let preformula = hours_cell.formula
-            if('d'+preformula == 'dnull') {
-                if(hours_cell.value) {
+            if ('d' + preformula == 'dnull') {
+                if (hours_cell.value) {
                     preformula = `=${hours_cell.value}`
                 } else {
                     preformula = `=0`
@@ -116,8 +116,8 @@ async function addhours(name, hours) {
         if (name.includes(name_cell.value) && name_cell.value != "" && name_cell.value != " ") {
             const hours_cell = sheet.getCell(y, hours_column)
             let preformula = hours_cell.formula
-            if('d'+preformula == 'dnull') {
-                if(hours_cell.value) {
+            if ('d' + preformula == 'dnull') {
+                if (hours_cell.value) {
                     preformula = `=${hours_cell.value}`
                 } else {
                     preformula = `=0`
@@ -236,8 +236,8 @@ const atCommands = {
 
             let full_url = `https://quickchart.io/chart?c=${encodeURIComponent(JSONfn.stringify(getTimeChartSpecs(requester_name, hours_as_data)))}&backgroundColor=white`.replace('%22YEET%22', encodeURIComponent("(value,context)=>{return value.y}").replace("\%22", ""))
             let short_url = await TinyURL.shorten(full_url)
-            
-            post.chat.postMessage({ channel: event.channel, blocks: [{"type": "image", image_url: short_url, "alt_text": "inspiration"}]})
+
+            post.chat.postMessage({ channel: event.channel, blocks: [{ "type": "image", image_url: short_url, "alt_text": "inspiration" }] })
 
         } else {
             post.chat.postMessage({ channel: event.channel, text: ":exclamation:No data has been recorded yet! Try graphing tomorrow... _-abraham lincoln_" }).catch((err) => { console.log(err) })
@@ -254,7 +254,7 @@ const atCommands = {
             if (!event.text.split(" ")[2].includes("<@")) {
                 if (event.text.split(" ")[2] === 'all' || event.text.split(" ")[2] === 'team') {
                     requester_name = 'total'
-                    
+
                 } else { return }
             } else {
                 event.user = event.text.split(" ")[2].replace("<", "").replace(">", "").replace("@", "")
@@ -270,7 +270,7 @@ const atCommands = {
             let full_url = `https://quickchart.io/chart?c=${encodeURIComponent(JSONfn.stringify(getTimeChartSpecs(requester_name, hours_as_data)))}&backgroundColor=white`.replace('%22YEET%22', encodeURIComponent("(value,context)=>{return value.y}").replace("\%22", ""))
             let short_url = await TinyURL.shorten(full_url)
 
-            post.chat.postMessage({ channel: event.channel, blocks: [{"type": "image", image_url: short_url, "alt_text": "inspiration"}]})
+            post.chat.postMessage({ channel: event.channel, blocks: [{ "type": "image", image_url: short_url, "alt_text": "inspiration" }] })
 
         } else {
             post.chat.postMessage({ channel: event.channel, text: ":exclamation:No data has been recorded yet! Try graphing tomorrow... _-abraham lincoln_" }).catch((err) => { console.log(err) })
@@ -436,13 +436,18 @@ const slashServer = http.createServer(async (request, response) => {
                             let hoursInput = real_json['view']['state']['values']['hours']['hours']['value'];
                             if (isNaN(hoursInput)) { return }
                             const hours = parseFloat(hoursInput);
-                            const task = real_json['view']['state']['values']['task']['task']['value']
-                            const blks = getSubmittedDm(hours, task)
-                            try {
-                                let boi = await post.chat.postMessage({ channel: channelId, text: blks })
-                                //console.log(boi);
-                            } catch (e) { console.log(e) }
-                            handleHoursRequest(channelId, hours, 0, task)
+                            // Filter out zero hour requests
+                            if (hours == 0) {
+                                let boi = await post.chat.postMessage({ channel: channelId, text: ":woman-shrugging: my dude you cant submit zero hours, i SIMPLY wont allow it. :shrug:" })
+                            } else {
+                                const task = real_json['view']['state']['values']['task']['task']['value']
+                                const blks = getSubmittedDm(hours, task)
+                                try {
+                                    let boi = await post.chat.postMessage({ channel: channelId, text: blks })
+                                    //console.log(boi);
+                                } catch (e) { console.log(e) }
+                                handleHoursRequest(channelId, hours, 0, task)
+                            }
                         } else {
                             let bits = real_json.view.private_metadata.split(",");
 
@@ -515,7 +520,7 @@ const slashServer = http.createServer(async (request, response) => {
 
                                 // INTERFACE WITH GOOGLE API
                                 // parseInt(real_json['actions'][0]['value'])
-                                if(DATA['e'][addId]['activity'] == 'lab') {
+                                if (DATA['e'][addId]['activity'] == 'lab') {
                                     addLabHours(DATA['e'][addId]['name'], DATA['e'][addId]['time'])
                                 } else {
                                     addhours(DATA['e'][addId]['name'], DATA['e'][addId]['time'])
@@ -581,16 +586,27 @@ const slashServer = http.createServer(async (request, response) => {
                         let userId = requestDict['user_id'];
                         if (!(requestDict.channel_name === "directmessage")) {
                             try {
-                                let boi = await post.chat.postEphemeral({ channel: channelId, text: msg_txt, user: userId })
+                                if (hours + mins == 0) {
+                                    let boi = await post.chat.postEphemeral({ channel: channelId, text: ":warning: I just blocked your submission of ZERO hours. Please submit hours in the form: `/log 2h 15m write error messaging for the slack time bot #METAAAAA!!!` :warning: (Make note of spaces/lack of spaces)", user: userId })
+                                } else {
+                                    let boi = await post.chat.postEphemeral({ channel: channelId, text: msg_txt, user: userId })
+                                }
                                 //console.log(boi);
                             } catch (e) { console.log(e) }
                         }
                         try {
-                            let boi = await post.chat.postMessage({ channel: userId, text: msg_txt })
+                            if (hours + mins == 0) {
+                                let boi = await post.chat.postEphemeral({ channel: channelId, text: ":warning: I just blocked your submission of ZERO hours. Please submit hours in the form: `/log 2h 15m write error messaging for the slack time bot #METAAAAA!!!` :warning: (Make note of spaces/lack of spaces)", user: userId })
+                            } else {
+
+                                let boi = await post.chat.postMessage({ channel: userId, text: msg_txt })
+                            }
                             //console.log(boi);
                         } catch (e) { console.log(e) }
 
-                        handleHoursRequest(userId, hours, mins, activity)
+                        if (hours + mins != 0) {
+                            handleHoursRequest(userId, hours, mins, activity)
+                        }
 
                     }
                 }
