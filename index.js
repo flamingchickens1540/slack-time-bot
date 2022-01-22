@@ -17,6 +17,7 @@ import TinyURL from 'tinyurl'
 
 import "cron"
 import { CronJob } from "cron";
+import { getHoursCut } from "./hoursCutter.js";
 
 const writeJSON = async function () {
     writeFile(json_data_path, JSON.stringify(DATA), (err) => { console.log(err) })
@@ -162,6 +163,7 @@ const recordHours = async () => {
             hours_record.data.total.push({ date: new Date(), hours: cum_value_cell.value })
         }
     }
+    hours_record = getHoursCut(hours_record)
     writeFileSync(json_hours_record_path, JSON.stringify(hours_record))
 }
 
