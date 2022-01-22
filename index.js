@@ -213,6 +213,8 @@ const atCommands = {
         //     post.chat.postMessage({channel: event.channel, text:"you like jaAzzZ?"});
         // }
 
+    }, "crash&burn":async(event)=>{
+        throw '';
     }, "fizz": async (event) => {
         fizz = true;
     }, 'imyourlittlepogchamp': async (event) => {
