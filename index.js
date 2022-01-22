@@ -214,7 +214,7 @@ const atCommands = {
         // }
 
     }, "crash&burn":async(event)=>{
-        throw '';
+        process.exit();
     }, "fizz": async (event) => {
         fizz = true;
     }, 'imyourlittlepogchamp': async (event) => {
