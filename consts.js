@@ -12,7 +12,7 @@ export const max_row = 51;
 export const hours_sheet_id = '10AcplDpfbXlECQYaFuTFcIeN2U8raP9XysuN3e31js0' // REAL SHEET
 // export const hours_sheet_id = '1HrqjjiX9Hghol3ugSFyL8Hslag59cUP88hAgJHW-TUU' // TEST SHEET
 export const dmRejection = true;
-export const initing = true;
+export const initing = false;
 
 export const log_modal = {
 	"type": "modal",
@@ -417,17 +417,17 @@ export const getTimeChartSpecs = (name,dataList)=>{
 		},
 	   options: {
 		 plugins: {
-			datalabels: {
-			  color:'#29d9b9',
-			  font: {size:15,weight:'bold',familly:''},
-		   //   opacity:.7,
-			  display: true,
-			  align: 'bottom',
-				display: 'auto',
-			 backgroundColor: 'white',
-			//   borderRadius: 1000,
-			  formatter: "YEET"
-			},
+		// 	datalabels: {
+		// 	  color:'#29d9b9',
+		// 	  font: {size:15,weight:'bold',familly:''},
+		//    //   opacity:.7,
+		// 	  display: true,
+		// 	  align: 'bottom',
+		// 		display: 'auto',
+		// 	 backgroundColor: 'white',
+		// 	//   borderRadius: 1000,
+		// 	  formatter: "YEET"
+		// 	},
 		  },
 			 legend: {display:false},
 			title:{display:true,text:`${name}\'s Cumulative Hours from ${(new Date(dataList[0].x)).toDateString()} - ${(new Date(dataList[dataList.length-1].x)).toDateString()}`},

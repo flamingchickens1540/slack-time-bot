@@ -235,8 +235,8 @@ const atCommands = {
             let requester_name = (await post.users.info({ user: event.user })).user.real_name
 
 
-
-            hours_record.data[requester_name].forEach(entry => { hours_as_data.push({ x: entry.date, y: entry.hours.toFixed(1) }) })
+            let lastEntry = -1
+            hours_record.data[requester_name].forEach(entry => { if(entry.hours.toFixed(1) != lastEntry){hours_as_data.push({ x: entry.date, y: entry.hours.toFixed(1) }); lastEntry = entry.hours.toFixed(1) }})
 
             let full_url = `https://quickchart.io/chart?c=${encodeURIComponent(JSONfn.stringify(getTimeChartSpecs(requester_name, hours_as_data)))}&backgroundColor=white`.replace('%22YEET%22', encodeURIComponent("(value,context)=>{return value.y}").replace("\%22", ""))
             let short_url = await TinyURL.shorten(full_url)
