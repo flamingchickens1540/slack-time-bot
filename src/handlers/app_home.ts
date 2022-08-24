@@ -9,9 +9,8 @@ type LeaderboardEntry = { name: string, hours: number }
 type LeaderboardFilter = (value: LogRow, index: number, array: LogRow[]) => boolean
 
 export async function handleAppHomeOpened({ ack, body, event, client }: SlackEventMiddlewareArgs<'app_home_opened'> & { client: WebClient }) {
-    
+    // Don't update when the messages tab is opened
     if (body.event.tab == 'home') {
-        console.log("App home opened")
         await publishHomeView(event.user, client)
     }
 }

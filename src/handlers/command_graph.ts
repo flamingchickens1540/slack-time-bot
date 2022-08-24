@@ -10,7 +10,6 @@ export async function handleGraphCommand({ command, ack, respond, client }: Slac
     await ack({ response_type: 'ephemeral', text: 'Generating...' })
 
     let args = command.text.split(" ").filter(x => x.trim() != '')
-    console.log(args)
     let users: string[] = []
     if (args.length == 0) {
         let user = await client.users.info({ user: command.user_id })
