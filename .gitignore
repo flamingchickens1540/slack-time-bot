@@ -1,8 +1,5 @@
-#client_secret.json
-#slack_secrets.js
-node_modules
-package-lock.json
-hours.json
-# data.json
-test.js
-hoursCut.json
+/node_modules
+/package-lock.json
+/secrets
+data.json
+bot.cjs
