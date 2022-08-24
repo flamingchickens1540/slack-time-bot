@@ -1,5 +1,5 @@
-import { SlackActionMiddlewareArgs, BlockAction, ButtonAction } from "@slack/bolt"
-import { WebClient } from "@slack/web-api"
+import type { SlackActionMiddlewareArgs, BlockAction, ButtonAction } from "@slack/bolt"
+import type { WebClient } from "@slack/web-api"
 import { getAcceptedDm } from "."
 import { savePendingRequests } from ".."
 import { slack_approver_id } from "../consts"

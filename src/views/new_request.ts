@@ -1,7 +1,7 @@
-import { KnownBlock } from "@slack/bolt";
+import type { KnownBlock } from "@slack/bolt";
 import { formatDuration, sanitizeCodeblock } from "../handlers";
 
-export function getPendingRequestBlocks(uid: string, hrs: number, activity: string, request_id: string): KnownBlock[] {
+export function getRequestBlocks(uid: string, hrs: number, activity: string, request_id: string): KnownBlock[] {
     return [
         {
             type: "header",

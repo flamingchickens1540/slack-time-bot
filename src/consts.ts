@@ -1,4 +1,4 @@
-import { SlackActionMiddlewareArgs, BlockAction, ButtonAction } from "@slack/bolt";
+import type { SlackActionMiddlewareArgs, BlockAction, ButtonAction } from "@slack/bolt";
 
 export const bot_port = 9191;
 export const slash_port = 9190;

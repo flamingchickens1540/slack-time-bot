@@ -12,8 +12,8 @@ import { handleAcceptButton } from "./handlers/button_accept.js";
 import { handleRejectButton } from "./handlers/button_reject.js";
 import { handleLogModal } from "./handlers/modal_log.js";
 import { handleRejectModal } from "./handlers/modal_reject.js";
-import { getPendingRequestBlocks as getNewRequestBlocks } from "./views/new_request.js";
-import { getSubmittedAltText, getPendingRequestBlocks } from "./messages.js";
+import { getRequestBlocks } from "./views/new_request.js";
+import { getSubmittedAltText, getAllPendingRequestBlocks } from "./messages.js";
 
 
 
@@ -42,7 +42,7 @@ export async function handleHoursRequest(uid: string, hrs: number, activity: str
     
     
     
-    let blocks = getNewRequestBlocks(uid, hrs, activity, request_id)
+    let blocks = getRequestBlocks(uid, hrs, activity, request_id)
     let message = await slack_app.client.chat.postMessage({ channel: slack_approver_id, text: getSubmittedAltText(name, hrs, activity), blocks: blocks })
     timeRequests[request_id] = { 
         name: name, 
@@ -90,7 +90,7 @@ export async function handleHoursRequest(uid: string, hrs: number, activity: str
         slack_app.client.chat.postMessage({
             channel: slack_approver_id,
             text: `${pendingRequests.length} pending time requests`,
-            blocks: await getPendingRequestBlocks(pendingRequests, slack_app.client)
+            blocks: await getAllPendingRequestBlocks(slack_app.client)
         })
     }
     new CronJob('0 * * * * *', sendPendingPing, null, true, 'America/Los_Angeles').start()

@@ -1,9 +1,9 @@
-import { App, SlackCommandMiddlewareArgs, SlackShortcutMiddlewareArgs, View } from "@slack/bolt";
-import { WebClient } from "@slack/web-api";
-import { handleHoursRequest } from "..";
+import type { SlackCommandMiddlewareArgs, SlackShortcutMiddlewareArgs } from "@slack/bolt";
+import type { WebClient } from "@slack/web-api";
 import { getSubmittedDm } from ".";
-import log_modal from "../views/log_view";
+import { handleHoursRequest } from "..";
 import { tooFewHours } from "../messages";
+import log_modal from "../views/log_view";
 
 
 function parseTimeArg(arg:string, hours:number, actIndex:number): [number, number] {

@@ -1,5 +1,5 @@
-import { SlackViewMiddlewareArgs, ViewSubmitAction } from "@slack/bolt";
-import { WebClient } from "@slack/web-api";
+import type { SlackViewMiddlewareArgs, ViewSubmitAction } from "@slack/bolt";
+import type { WebClient } from "@slack/web-api";
 import { getSubmittedDm } from ".";
 import { handleHoursRequest } from "..";
 import { tooFewHours } from "../messages";

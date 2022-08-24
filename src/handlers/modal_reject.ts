@@ -1,8 +1,8 @@
-import { SlackViewMiddlewareArgs, ViewClosedAction, ViewSubmitAction } from "@slack/bolt";
-import { ModalView, WebClient } from "@slack/web-api";
+import type { SlackViewMiddlewareArgs, ViewSubmitAction } from "@slack/bolt";
+import type { WebClient } from "@slack/web-api";
+import { getRejectedDm } from ".";
 import { savePendingRequests } from "..";
 import { slack_approver_id } from "../consts";
-import { formatDuration, getRejectedDm } from ".";
 
 export async function handleRejectModal({ ack, body, view, client }: SlackViewMiddlewareArgs<ViewSubmitAction> & { client: WebClient }) {
     await ack()

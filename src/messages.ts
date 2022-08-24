@@ -1,5 +1,4 @@
-import { KnownBlock, WebClient } from "@slack/web-api"
-import { TimeRequest } from "./consts"
+import type { KnownBlock, WebClient } from "@slack/web-api"
 import { formatDuration, sanitizeCodeblock } from "./handlers"
 
 /** 
@@ -17,7 +16,7 @@ export const tooFewHours = ":warning: I just blocked your submission of ZERO hou
 /**
  * Gets a list of pending time requests
 */
-export const getPendingRequestBlocks = async (countList:TimeRequest[], slack_client:WebClient) => {
+export const getAllPendingRequestBlocks = async (slack_client:WebClient) => {
 
     let output:KnownBlock[] = [
         {
@@ -29,7 +28,7 @@ export const getPendingRequestBlocks = async (countList:TimeRequest[], slack_cli
             }
         },
     ]
-    await Promise.all(countList.map(async (person) => {
+    await Promise.all(Object.values(timeRequests).map(async (person) => {
         let permalink = await slack_client.chat.getPermalink({ channel: person.requestMessage.channel, message_ts: person.requestMessage.ts })
         output.push({
             "type": "section",

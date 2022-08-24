@@ -1,4 +1,4 @@
-import { ModalView } from "@slack/bolt";
+import type { ModalView } from "@slack/bolt";
 
 export const log_modal:ModalView = {
     "type": "modal",
