@@ -93,8 +93,8 @@ export async function handleHoursRequest(uid: string, hrs: number, activity: str
             blocks: await getAllPendingRequestBlocks(slack_app.client)
         })
     }
-    new CronJob('0 * * * * *', sendPendingPing, null, true, 'America/Los_Angeles').start()
-    console.log("Cron Job Started!")
+    new CronJob('30 9 * * *', sendPendingPing, null, true, 'America/Los_Angeles').start()
+    console.log("Cron Job Scheduled!")
     
     
     slack_app.start().then(async () => {
