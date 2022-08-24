@@ -46,3 +46,9 @@ export async function getHours(): Promise<LogRow[]> {
         }
     })
 }
+
+export async function waitForGoogleDrive() {
+    while (!googleDriveAuthed) {
+        await new Promise(resolve => setTimeout(resolve, 50));
+    }
+}

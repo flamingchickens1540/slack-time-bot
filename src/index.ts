@@ -2,7 +2,8 @@ import { App, LogLevel } from "@slack/bolt";
 
 import { existsSync, readFileSync, writeFile } from 'fs';
 import { app_token, signing_secret, token } from '../secrets/slack_secrets.js';
-import { json_data_path, slack_approver_id, TimeRequest } from './consts.js';
+import { json_data_path, slack_approver_id } from './consts.js';
+import type { HomeSettings, TimeRequest } from './consts.js';
 
 import "cron";
 import { v4 as uuidV4} from "uuid";
@@ -15,23 +16,34 @@ import { handleRejectModal } from "./handlers/modal_reject.js";
 import { getRequestBlocks } from "./views/new_request.js";
 import { getSubmittedAltText, getAllPendingRequestBlocks } from "./messages.js";
 import { handleGraphCommand } from "./handlers/command_graph.js";
+import { handleAppHomeOpened, handleLeaderboardAction, publishHomeView } from "./handlers/app_home.js";
+import { waitForGoogleDrive } from "./utils/drive.js";
 
 
 
 declare global {
     var timeRequests: { [key: string]: TimeRequest };
+    var homeSettings: { [key: string]: HomeSettings };
 }
-export async function savePendingRequests() {
-    writeFile(json_data_path, JSON.stringify(globalThis.timeRequests), (err) => { console.log(err) })
+export async function saveData() {
+    writeFile(json_data_path, JSON.stringify({time_requests:timeRequests, home_settings:homeSettings}), (err) => { console.log(err) })
 }
 
 
 
 if (existsSync(json_data_path)) {
-    timeRequests = JSON.parse(readFileSync(json_data_path, 'utf-8'))
+    let data
+    try {
+        data = JSON.parse(readFileSync(json_data_path, 'utf-8'))
+    } catch(err) {
+        data = {time_requests:{}, home_settings:{}}
+    }
+    timeRequests = data["time_requests"]
+    homeSettings = data["home_settings"]
 } else {
     timeRequests = {}
-    savePendingRequests()
+    homeSettings = {}
+    saveData()
 }
 
 export async function handleHoursRequest(uid: string, hrs: number, activity: string) {
@@ -57,49 +69,52 @@ export async function handleHoursRequest(uid: string, hrs: number, activity: str
             blocks: message.message!.blocks!
         }
     }
-    savePendingRequests()
+    saveData()
 }
-    // INIT SLACK 
+// INIT SLACK 
+
+const slack_app = new App({
+    token: token,
+    signingSecret: signing_secret,
+    socketMode: true,
+    appToken: app_token,
+    // logLevel: LogLevel.DEBUG
     
-    const slack_app = new App({
-        token: token,
-        signingSecret: signing_secret,
-        socketMode: true,
-        appToken: app_token,
-        logLevel: LogLevel.INFO
-        
-    });
-    
-    //SLACK EVENTS HANDLER
-    
-    slack_app.command('/log', handleLogCommand)
-    slack_app.command('/graph', handleGraphCommand)
-    slack_app.shortcut('log_hours', handleLogShortcut)
-    
-    slack_app.action("accept", handleAcceptButton)
-    slack_app.action("reject", handleRejectButton)
-    slack_app.action("jump_url", async ({ack}) => {await ack()})
-    
-    slack_app.view("reject_message", handleRejectModal)
-    slack_app.view("time_submission", handleLogModal)
-    
-    //START WORKING: 9:20
-    
-    // PENDING REQUESTS
-    
-    const sendPendingPing = async () => {
-        var pendingRequests = Object.values(timeRequests)
-        slack_app.client.chat.postMessage({
-            channel: slack_approver_id,
-            text: `${pendingRequests.length} pending time requests`,
-            blocks: await getAllPendingRequestBlocks(slack_app.client)
-        })
-    }
-    new CronJob('30 9 * * *', sendPendingPing, null, true, 'America/Los_Angeles').start()
-    console.log("Cron Job Scheduled!")
-    
-    
-    slack_app.start().then(async () => {
-        console.log("Bot started")
+});
+
+//SLACK EVENTS HANDLER
+
+slack_app.command('/log', handleLogCommand)
+slack_app.command('/graph', handleGraphCommand)
+slack_app.shortcut('log_hours', handleLogShortcut)
+
+slack_app.action("accept", handleAcceptButton)
+slack_app.action("reject", handleRejectButton)
+slack_app.action("jump_url", async ({ack}) => {await ack()})
+slack_app.action("selected_metric", handleLeaderboardAction)
+
+slack_app.view("reject_message", handleRejectModal)
+slack_app.view("time_submission", handleLogModal)
+
+
+slack_app.event('app_home_opened', handleAppHomeOpened)
+
+//START WORKING: 9:20
+
+// PENDING REQUESTS
+
+const sendPendingPing = async () => {
+    var pendingRequests = Object.values(timeRequests)
+    slack_app.client.chat.postMessage({
+        channel: slack_approver_id,
+        text: `${pendingRequests.length} pending time requests`,
+        blocks: await getAllPendingRequestBlocks(slack_app.client)
     })
-    
+}
+new CronJob('30 9 * * *', sendPendingPing, null, true, 'America/Los_Angeles').start()
+console.log("Cron Job Scheduled!")
+
+
+slack_app.start().then(async () => {
+    console.log("Bot started")
+})

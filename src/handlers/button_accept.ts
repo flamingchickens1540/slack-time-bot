@@ -1,7 +1,7 @@
 import type { SlackActionMiddlewareArgs, BlockAction, ButtonAction } from "@slack/bolt"
 import type { WebClient } from "@slack/web-api"
 import { getAcceptedDm } from "."
-import { savePendingRequests } from ".."
+import { saveData } from ".."
 import { slack_approver_id } from "../consts"
 import { addHours } from "../utils//drive"
 
@@ -30,7 +30,7 @@ export async function handleAcceptButton({ ack, body, action, client }: SlackAct
 
     await client.chat.postMessage({ channel: time_request.userId, text: getAcceptedDm(slack_approver_id, time_request.time, time_request.activity) })
     delete timeRequests[request_id]
-    savePendingRequests()
+    saveData()
 }
 
 

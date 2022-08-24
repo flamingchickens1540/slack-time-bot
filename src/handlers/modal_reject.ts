@@ -1,7 +1,7 @@
 import type { SlackViewMiddlewareArgs, ViewSubmitAction } from "@slack/bolt";
 import type { WebClient } from "@slack/web-api";
 import { getRejectedDm } from ".";
-import { savePendingRequests } from "..";
+import { saveData } from "..";
 import { slack_approver_id } from "../consts";
 
 export async function handleRejectModal({ ack, body, view, client }: SlackViewMiddlewareArgs<ViewSubmitAction> & { client: WebClient }) {
@@ -34,7 +34,7 @@ export async function handleRejectModal({ ack, body, view, client }: SlackViewMi
     } catch (err) { console.error("Failed to handle reject modal:\n" + err) }
 
     delete globalThis.timeRequests[request_id]
-    savePendingRequests()
+    saveData()
 }
 
 
