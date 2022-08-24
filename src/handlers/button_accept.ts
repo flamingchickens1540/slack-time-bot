@@ -3,7 +3,7 @@ import type { WebClient } from "@slack/web-api"
 import { getAcceptedDm } from "."
 import { savePendingRequests } from ".."
 import { slack_approver_id } from "../consts"
-import { addHours } from "../drive"
+import { addHours } from "../utils//drive"
 
 
 

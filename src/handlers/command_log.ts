@@ -18,7 +18,7 @@ function parseTimeArg(arg:string, hours:number, actIndex:number): [number, numbe
     }
     return [hours, actIndex]
 }
-export async function handleLogcommand({ command, ack, respond, client}: SlackCommandMiddlewareArgs & {client: WebClient}) {
+export async function handleLogCommand({ command, ack, respond, client}: SlackCommandMiddlewareArgs & {client: WebClient}) {
     await ack()
 
     var hours = 0, actStart = 0;

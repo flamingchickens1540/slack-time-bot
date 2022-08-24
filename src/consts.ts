@@ -21,3 +21,11 @@ export interface TimeRequest {
         blocks: any[]
     }
 }
+
+export interface LogRow {
+    time_in: Date,
+    time_out: Date,
+    name: string,
+    hours: number,
+    type: string
+}

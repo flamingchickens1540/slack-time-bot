@@ -1,9 +1,10 @@
 import { readFileSync } from 'fs';
 import { GoogleSpreadsheet } from "google-spreadsheet";
-import { hours_sheet_id, log_sheet_name } from "./consts";
+import type GoogleSpreadsheetWorksheet from 'google-spreadsheet/lib/GoogleSpreadsheetWorksheet';
+import { hours_sheet_id, LogRow, log_sheet_name } from "../consts";
 
 let googleDriveAuthed = false;
-let sheet
+let sheet: GoogleSpreadsheetWorksheet
 
 // Initialize Google Drive client
 (async () => {
@@ -19,7 +20,7 @@ let sheet
 export async function addHours(name, hours) {
     if (!googleDriveAuthed) return;
     await sheet.loadCells()
-    let currentTime = Date.now()/1000
+    let currentTime = Date.now() / 1000
     // Add to sheet
     try {
         await sheet.loadCells()
@@ -31,3 +32,17 @@ export async function addHours(name, hours) {
     }
 }
 
+export async function getHours(): Promise<LogRow[]> {
+    if (!googleDriveAuthed) return [];
+    await sheet.loadCells()
+    let rows = await sheet.getRows()
+    return rows.map(row => {
+        return {
+            time_in: new Date(parseInt(row._rawData[0]+ "000")),
+            time_out: new Date(parseInt(row._rawData[1]+ "000")),
+            name: row._rawData[2],
+            hours: parseFloat(row._rawData[3]),
+            type: row._rawData[4],
+        }
+    })
+}

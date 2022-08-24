@@ -7,13 +7,14 @@ import { json_data_path, slack_approver_id, TimeRequest } from './consts.js';
 import "cron";
 import { v4 as uuidV4} from "uuid";
 import { CronJob } from "cron";
-import { handleLogcommand, handleLogShortcut } from "./handlers/command_log.js";
+import { handleLogCommand, handleLogShortcut } from "./handlers/command_log.js";
 import { handleAcceptButton } from "./handlers/button_accept.js";
 import { handleRejectButton } from "./handlers/button_reject.js";
 import { handleLogModal } from "./handlers/modal_log.js";
 import { handleRejectModal } from "./handlers/modal_reject.js";
 import { getRequestBlocks } from "./views/new_request.js";
 import { getSubmittedAltText, getAllPendingRequestBlocks } from "./messages.js";
+import { handleGraphCommand } from "./handlers/command_graph.js";
 
 
 
@@ -71,7 +72,8 @@ export async function handleHoursRequest(uid: string, hrs: number, activity: str
     
     //SLACK EVENTS HANDLER
     
-    slack_app.command('/log', handleLogcommand)
+    slack_app.command('/log', handleLogCommand)
+    slack_app.command('/graph', handleGraphCommand)
     slack_app.shortcut('log_hours', handleLogShortcut)
     
     slack_app.action("accept", handleAcceptButton)
