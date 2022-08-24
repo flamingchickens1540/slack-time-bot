@@ -1,6 +1,7 @@
 import type { SlackCommandMiddlewareArgs, SlackShortcutMiddlewareArgs } from "@slack/bolt";
 import type { KnownBlock, WebClient } from "@slack/web-api";
 import { PassThrough } from "stream";
+import { formatNames } from ".";
 import { createChart } from "../utils/chart";
 import log_modal from "../views/log_view";
 
@@ -14,7 +15,7 @@ export async function handleGraphCommand({ command, ack, respond, client }: Slac
     if (args.length == 0) {
         let user = await client.users.info({ user: command.user_id })
         users = [user.user!.real_name!]
-    } else if (args[0]  == 'all') {
+    } else if (args[0] == 'all') {
         users = args
     } else {
         // Collect all user names from mentions
@@ -29,5 +30,22 @@ export async function handleGraphCommand({ command, ack, respond, client }: Slac
     }
 
     let image_url = await createChart(users)
-    await respond({ text: "Hours graph", blocks: [{ "type": "image", image_url: image_url, "alt_text": "hour graph" }], response_type: 'in_channel' })
+    await respond({ text: "Hours graph", blocks: getGraphBlocks(image_url, command.user_id, users), response_type: 'in_channel' })
+}
+
+const getGraphBlocks = (image_url: string, user_id:string, names:string[]): KnownBlock[] => {
+    return [
+        {
+            type: 'section',
+            text: {
+                type: 'mrkdwn',
+                text: `:chart_with_upwards_trend: <@${user_id}> generated a graph for ${formatNames(names)}`,
+            }
+        },
+        {
+            type: "image",
+            image_url: image_url,
+            alt_text: "hour graph"
+        }
+    ]
 }

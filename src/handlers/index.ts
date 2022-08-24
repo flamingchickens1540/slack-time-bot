@@ -19,6 +19,19 @@ export function formatDuration(hrs: number, mins?: number): string {
 	}
 }
 
+export function formatNames(names: string[]): string {
+	if (names[0] == 'all') { 
+        names[0] = "Team 1540"
+    } 
+	if (names.length === 1) {
+		return names[0]
+	} else if (names.length === 2) {
+		return `${names[0]} and ${names[1]}`
+	} else {
+		return `${names.slice(0, names.length - 1).join(', ')}, and ${names[names.length - 1]}`
+	}
+}
+
 
 export const getSubmittedDm = (data: { hours: number, minutes?: number, activity: string }) => {
 	return `:clock2: You submitted *${formatDuration(data.hours, data.minutes)}* :clock7:\n>>>:person_climbing: *Activity:*\n\`${sanitizeCodeblock(data.activity)}\``

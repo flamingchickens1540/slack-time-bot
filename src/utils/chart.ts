@@ -1,5 +1,6 @@
 import { getHours } from "./drive";
 import { shorten } from 'tinyurl'
+import { formatNames } from "../handlers";
 
 async function getChartData(names: string[]) {
     let data = await getHours()
@@ -21,18 +22,7 @@ async function getChartData(names: string[]) {
             y: cumulative_hours[index].toFixed(1)
         }
     })
-    let namestring
-    if (names[0] == 'all') { 
-        names[0] = "Team 1540"
-    } 
-    if (names.length == 1)      { namestring = names[0] }
-    else if (names.length == 2) { namestring = names[0] + " and " + names[1] } 
-    else if (names.length == 5) { namestring = names.slice(0,3).join(", ") + ', and 1 other'} 
-    else if (names.length >  5) { namestring = names.slice(0,3).join(", ") + `, and ${names.length-4} others`} 
-    
-    else                        { namestring = names.slice(0, -2).join(", ") + ", and " + names[-1]}
-
-
+    let namestring = formatNames(names)
     return getTimeChartSpecs(namestring, chartData)
 }
 
@@ -88,3 +78,4 @@ export function getTimeChartSpecs(name: string, dataList: { x: string, y: string
         }
     }
 }
+
