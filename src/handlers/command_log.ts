@@ -2,7 +2,7 @@ import type { SlackCommandMiddlewareArgs, SlackShortcutMiddlewareArgs } from "@s
 import type { WebClient } from "@slack/web-api";
 import { getSubmittedDm } from ".";
 import { handleHoursRequest } from "..";
-import { tooFewHours } from "../messages";
+import { noActivitySpecified, tooFewHours } from "../messages";
 import log_modal from "../views/log_view";
 
 
@@ -29,24 +29,25 @@ export async function handleLogCommand({ command, ack, respond, client}: SlackCo
             trigger_id: command.trigger_id
         })
     } else if (args.length === 1) {
-
+        await respond({ response_type: 'ephemeral', text: noActivitySpecified })
     } else {
         [hours, actStart] = parseTimeArg(args[0], hours, actStart);
         [hours, actStart] = parseTimeArg(args[1], hours, actStart);
 
         let activity = args.slice(actStart, args.length).join(' ');
+        if (activity == '') {
+            await respond({ response_type: 'ephemeral', text: noActivitySpecified })
+            return
+        }
         let msg_txt = getSubmittedDm({hours:hours, activity:activity});
         try {
-            if (hours == 0) {
+            if (hours <= 0) {
                 await respond({ response_type: 'ephemeral', text: tooFewHours})
             } else {
                 await client.chat.postMessage({ channel: command.user_id, text: msg_txt })
+                handleHoursRequest(command.user_id, hours, activity)
             }
-        } catch (err) { console.error("Failed to confirm log command:\n" + err) }
-
-        if (hours > 0) {
-            handleHoursRequest(command.user_id, hours, activity)
-        }
+        } catch (err) { console.error("Failed to complete log command:\n" + err) }
 
     }
 }
