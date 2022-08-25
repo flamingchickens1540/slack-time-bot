@@ -6,7 +6,7 @@ import { addHours } from "../utils/drive"
 
 
 
-export async function handleAcceptButton({ ack, body, action, client }: SlackActionMiddlewareArgs<BlockAction<ButtonAction>> &AllMiddlewareArgs) {
+export async function handleAcceptButton({ ack, logger, body, action, client }: SlackActionMiddlewareArgs<BlockAction<ButtonAction>> & AllMiddlewareArgs) {
     await ack()
     let request_id = action.value
     let time_request = timeRequests[request_id]
@@ -33,7 +33,7 @@ export async function handleAcceptButton({ ack, body, action, client }: SlackAct
                     { "type": "divider" }
                 ]
             })
-        } catch (err) { console.error("Failed to handle reject modal:\n" + err) }
+        } catch (err) { logger.error("Failed to handle reject modal:\n" + err) }
     }))
 
     addHours(time_request.name, time_request.time)

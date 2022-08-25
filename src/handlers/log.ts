@@ -18,7 +18,7 @@ function parseTimeArg(arg: string, hours: number, actIndex: number): [number, nu
     return [hours, actIndex]
 }
 
-export async function handleLogCommand({ command, ack, respond, client }: SlackCommandMiddlewareArgs & AllMiddlewareArgs) {
+export async function handleLogCommand({ command, logger, ack, respond, client }: SlackCommandMiddlewareArgs & AllMiddlewareArgs) {
     await ack()
 
     var hours = 0, actStart = 0;
@@ -47,7 +47,7 @@ export async function handleLogCommand({ command, ack, respond, client }: SlackC
                 await client.chat.postMessage({ channel: command.user_id, text: msg_txt })
                 handleHoursRequest(command.user_id, hours, activity)
             }
-        } catch (err) { console.error("Failed to complete log command:\n" + err) }
+        } catch (err) { logger.error("Failed to complete log command:\n" + err) }
 
     }
 }
@@ -61,7 +61,7 @@ export async function handleLogShortcut({ shortcut, ack, client }: SlackShortcut
     })
 }
 
-export async function handleLogModal({ ack, body, view, client }: SlackViewMiddlewareArgs<ViewSubmitAction> & { client: WebClient }) {
+export async function handleLogModal({ ack, body, view, client, logger }: SlackViewMiddlewareArgs<ViewSubmitAction> & AllMiddlewareArgs) {
     await ack()
 
     // Get the hours and task from the modal
@@ -75,7 +75,7 @@ export async function handleLogModal({ ack, body, view, client }: SlackViewMiddl
         let message = getSubmittedDm({ hours: hours, activity: activity });
         try {
             await client.chat.postMessage({ channel: body.user.id, text: message })
-        } catch (err) { console.error("Failed to handle log modal:\n" + err) }
+        } catch (err) { logger.error("Failed to handle log modal:\n" + err) }
         handleHoursRequest(body.user.id, hours, activity)
     } else {
         await client.chat.postMessage({ channel: body.user.id, text: tooFewHours })
