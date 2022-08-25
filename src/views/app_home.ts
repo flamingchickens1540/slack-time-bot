@@ -1,5 +1,5 @@
 import type { KnownBlock, MrkdwnElement, PlainTextOption } from "@slack/bolt";
-import { formatDuration } from "../messages";
+import { formatHours } from "../messages";
 import type { LeaderboardType, LogRow } from "../types";
 import { getHours } from "../utils/drive";
 
@@ -46,7 +46,7 @@ const getLeaderboardViewBlocks = (leaderboard_entries: { name: string, hours: st
         },
         {
             type: "mrkdwn",
-            text: `*${formatDuration(parseFloat(entry.hours))}*`,
+            text: `${formatHours(parseFloat(entry.hours))}`,
         }
         )
     })
