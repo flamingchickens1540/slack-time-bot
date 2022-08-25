@@ -14,7 +14,7 @@ export async function handleAppHomeOpened({ body, event, client }: SlackEventMid
 }
 
 export async function publishDefaultHomeView(user: string, client: WebClient) {
-    if (user == slack_admin_id) {
+    if (user == slack_admin_id || slackApproverIDs.includes(user)) {
         await publishHomeView(user, client, settingsButton, ...await getLeaderboardView(user))
     } else {
         await publishHomeView(user, client, ...await getLeaderboardView(user))
