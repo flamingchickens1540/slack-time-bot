@@ -76,10 +76,6 @@ export function formatDuration(hrs: number, mins?: number): string {
 	}
 }
 
-export function formatHours(hrs: number): string {
-	return hrs === 1 ? '1 hour' : `${hrs.toFixed(1)} hours`
-}
-
 export function formatNames(names: string[]): string {
 	if (names[0] == 'all') { 
         names[0] = "Team 1540"

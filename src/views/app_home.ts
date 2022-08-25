@@ -1,8 +1,7 @@
-import type { KnownBlock, MrkdwnElement, PlainTextOption } from "@slack/bolt";
-import { formatHours } from "../messages";
+import type { KnownBlock, MrkdwnElement, PlainTextElement, PlainTextOption, SectionBlock } from "@slack/bolt";
 import type { LeaderboardType, LogRow } from "../types";
 import { getHours } from "../utils/drive";
-
+import { leaderboard_config } from "../consts";
 type LeaderboardEntry = { name: string, hours: number }
 type LeaderboardFilter = (value: LogRow, index: number, array: LogRow[]) => boolean
 
@@ -30,23 +29,45 @@ export async function getLeaderboardView(user: string): Promise<KnownBlock[]> {
     
     // Sort the people by hours, reversed
     let sorted = Object.values(people).sort((a, b) => b.hours - a.hours).slice(0, 10)
-    let leaderboard_data = sorted.map(({ name, hours }) => ({ name: name, hours: hours.toFixed(1) }))
+    let leaderboard_data = sorted.map(({ name, hours }) => ({ name: name, hours: hours }))
     
     return getLeaderboardViewBlocks(leaderboard_data, settings.leaderboard_type)
 }
 
 
-const getLeaderboardViewBlocks = (leaderboard_entries: { name: string, hours: string }[], currentMetric: LeaderboardType, entryCount?: number): KnownBlock[] => {
+const getLeaderboardViewBlocks = (leaderboard_entries: { name: string, hours: number }[], currentMetric: LeaderboardType, entryCount?: number): KnownBlock[] => {
     entryCount = entryCount ?? 10
     let fields: MrkdwnElement[] = []
+    // Calculate padding amounts
+    let name_padding = 0
+    let time_padding = 0
+    let max_hours = 0
+
     leaderboard_entries.forEach((entry, index) => {
+        let name_length = entry.name.length+(index+1).toString().length+2
+        if (name_length > name_padding) name_padding = name_length
+
+        let time_length = entry.hours.toFixed(1).length+6
+        if (time_length > time_padding) time_padding = time_length
+
+        if (entry.hours > max_hours) max_hours = entry.hours
+    })
+    leaderboard_entries.forEach((entry, index) => {
+        let name_text = `${index + 1}) ${entry.name}`.padEnd(name_padding)
+        let hour_text = `${entry.hours.toFixed(1)} hours`.padEnd(time_padding)
+        let bar_length = Math.round(entry.hours/max_hours*leaderboard_config.max_bar_length)
+        let bar = ""
+        bar += ":large_red_square:".repeat(Math.min(bar_length, leaderboard_config.max_r))
+        bar += ":large_orange_square:".repeat(Math.max(Math.min(bar_length-leaderboard_config.max_r, leaderboard_config.max_o),0))
+        bar += ":large_yellow_square:".repeat(Math.max(Math.min(bar_length-leaderboard_config.max_r-leaderboard_config.max_o, leaderboard_config.max_y),0))
+        
         fields.push({
             type: "mrkdwn",
-            text: `*${index + 1})* ${entry.name}`,
+            text: `\`${name_text} -- ${hour_text}\``,
         },
         {
             type: "mrkdwn",
-            text: `${formatHours(parseFloat(entry.hours))}`,
+            text: " "+bar,
         }
         )
     })
@@ -57,7 +78,7 @@ const getLeaderboardViewBlocks = (leaderboard_entries: { name: string, hours: st
             text: "No entries found",
         })
     }
-    let fieldGroups: KnownBlock[] = []
+    let fieldGroups: SectionBlock[] = []
     for (let index = 0; index < fields.length; index += 10) {
         let chunk = fields.slice(index, index + 10);
         fieldGroups.push({
@@ -65,6 +86,7 @@ const getLeaderboardViewBlocks = (leaderboard_entries: { name: string, hours: st
             fields: chunk
         })
     }
+    
     return [
         {
             type: "header",
@@ -147,6 +169,3 @@ const leaderboardFilters: { [key: string]: LeaderboardFilter } = {
     'external': getExternalHoursLeaderboard,
     'lab': getLabHoursLeaderboard
 }
-
-
-
