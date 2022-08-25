@@ -1,9 +1,6 @@
-import type { AllMiddlewareArgs, SlackCommandMiddlewareArgs, SlackShortcutMiddlewareArgs } from "@slack/bolt";
-import type { KnownBlock, WebClient } from "@slack/web-api";
-import { PassThrough } from "stream";
-import { formatNames } from ".";
+import type { AllMiddlewareArgs, SlackCommandMiddlewareArgs, KnownBlock } from "@slack/bolt";
+import { formatNames } from "../messages";
 import { createChart } from "../utils/chart";
-import log_modal from "../views/log_view";
 
 
 export async function handleGraphCommand({ command, ack, respond, client }: SlackCommandMiddlewareArgs & AllMiddlewareArgs) {

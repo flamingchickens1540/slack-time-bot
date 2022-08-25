@@ -1,7 +1,25 @@
-import type { AllMiddlewareArgs, SlackViewMiddlewareArgs, ViewSubmitAction } from "@slack/bolt";
-import type { Block, WebClient } from "@slack/web-api";
-import { getRejectedDm } from ".";
-import { saveData } from "..";
+import type { KnownBlock, SlackViewMiddlewareArgs, ViewSubmitAction } from "@slack/bolt";
+import { AllMiddlewareArgs } from "@slack/bolt";
+import { formatDuration, sanitizeCodeblock } from "../messages";
+import type { ButtonActionMiddlewareArgs } from "../types";
+import { saveData } from "../utils/data";
+import { getRejectMessageModal } from "../views/reject";
+
+
+
+
+export async function handleRejectButton({ ack, body, action, client }: ButtonActionMiddlewareArgs & AllMiddlewareArgs) {
+    await ack()
+    let requestInfo = timeRequests[action.value]
+    try {
+        client.views.open({
+            trigger_id: body.trigger_id,
+            view: getRejectMessageModal(requestInfo.name, requestInfo.time, requestInfo.activity, action.value)
+        })
+    } catch (err) { console.error("Failed to handle reject button:\n" + err) }
+    
+}
+
 
 export async function handleRejectModal({ ack, body, view, client }: SlackViewMiddlewareArgs<ViewSubmitAction> & AllMiddlewareArgs) {
     await ack()
@@ -10,7 +28,7 @@ export async function handleRejectModal({ ack, body, view, client }: SlackViewMi
     await Promise.all(Object.entries(timeRequest.requestMessages).map(async ([approver_id, request_message]) => {
         try {
             let message = (await client.conversations.history({ channel: request_message.channel, latest: request_message.ts, limit: 1, inclusive: true })).messages![0]
-            let oldBlocks = message.blocks!
+            let oldBlocks = message.blocks! as KnownBlock[]
             let footer_name = (body.user.id == approver_id) ? "You" : `<@${body.user.id}>`
     
             client.chat.update({
@@ -18,8 +36,8 @@ export async function handleRejectModal({ ack, body, view, client }: SlackViewMi
                 ts: request_message.ts,
                 text: message.text + " (REJECTED)",
                 blocks: [
-                    oldBlocks[0] as Block,
-                    oldBlocks[1] as Block,
+                    oldBlocks[0],
+                    oldBlocks[1],
                     {
                         type: "section",
                         text: {
@@ -45,5 +63,6 @@ export async function handleRejectModal({ ack, body, view, client }: SlackViewMi
     saveData()
 }
 
-
-
+const getRejectedDm = (user, hours, activity, message) => {
+	return `:x: *<@${user}>* rejected *${formatDuration(hours)}* :x:\n>>>:person_climbing: *Activity:*\n\`${sanitizeCodeblock(activity)}\`\n:loudspeaker: *Message:*\n\`${sanitizeCodeblock(message)}\``
+}

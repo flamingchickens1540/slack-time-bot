@@ -1,5 +1,5 @@
 import type { ModalView } from "@slack/bolt";
-import { formatDuration, sanitizeCodeblock } from "../handlers";
+import { formatDuration, sanitizeCodeblock } from "../messages";
 
 export function getRejectMessageModal(name:string, hours:number, activity:string, request_id:string): ModalView {
     return {

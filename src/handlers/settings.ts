@@ -1,8 +1,7 @@
-import type { AllMiddlewareArgs, BlockAction, MultiUsersSelectAction, SlackActionMiddlewareArgs, SlackViewMiddlewareArgs, ViewSubmitAction } from "@slack/bolt"
-import { saveData } from ".."
-import { ButtonActionMiddlewareArgs } from "../consts"
-import { getSettingsView } from "../views/bot_settings_view"
-import { publishDefaultHomeView } from "./app_home"
+import type { AllMiddlewareArgs, SlackViewMiddlewareArgs, ViewSubmitAction } from "@slack/bolt"
+import type { ButtonActionMiddlewareArgs } from "../types"
+import { saveData } from "../utils/data"
+import { getSettingsView } from "../views/settings"
 
 
 export async function handleOpenSettingsModal({ ack, client, body }: ButtonActionMiddlewareArgs & AllMiddlewareArgs) {

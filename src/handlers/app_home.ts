@@ -1,8 +1,11 @@
 import type { AllMiddlewareArgs, SlackEventMiddlewareArgs } from "@slack/bolt";
 import type { KnownBlock, WebClient } from "@slack/web-api";
 import { slack_admin_id } from "../consts";
-import { settingsButton } from "../views/bot_settings_view";
-import { getLeaderboardView } from "../views/leaderboard_view";
+import type { LeaderboardType, StaticSelectActionMiddlewareArgs } from "../types";
+import { saveData } from "../utils/data";
+import { settingsButton } from "../views/settings";
+import { getLeaderboardView } from "../views/app_home";
+
 
 
 
@@ -31,3 +34,17 @@ export async function publishHomeView(user: string, client: WebClient, ...blocks
     })
 }
 
+
+export async function handleLeaderboardAction({ ack, client, body, action }: StaticSelectActionMiddlewareArgs & AllMiddlewareArgs) {
+    await ack()
+    let selected_metric = action.selected_option.value
+    if (typeof (homeSettings[body.user.id]) === 'undefined') {
+        homeSettings[body.user.id] = {
+            leaderboard_type: selected_metric as LeaderboardType
+        }
+    } else {
+        homeSettings[body.user.id].leaderboard_type = selected_metric as LeaderboardType
+    }
+    publishDefaultHomeView(body.user.id, client)
+    await saveData()
+}

@@ -1,6 +1,6 @@
 import { getHours } from "./drive";
 import { shorten } from 'tinyurl'
-import { formatNames } from "../handlers";
+import { formatNames } from "../messages";
 
 async function getChartData(names: string[]) {
     let data = await getHours()

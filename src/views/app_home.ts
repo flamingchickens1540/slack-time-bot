@@ -1,7 +1,6 @@
-import type { Block, HomeView, KnownBlock, MrkdwnElement, PlainTextOption } from "@slack/bolt";
-import type { WebClient } from "@slack/web-api";
-import type { LeaderboardType, LogRow } from "../consts";
-import { formatDuration } from "../handlers";
+import type { KnownBlock, MrkdwnElement, PlainTextOption } from "@slack/bolt";
+import { formatDuration } from "../messages";
+import type { LeaderboardType, LogRow } from "../types";
 import { getHours } from "../utils/drive";
 
 type LeaderboardEntry = { name: string, hours: number }
@@ -19,7 +18,7 @@ export async function getLeaderboardView(user: string): Promise<KnownBlock[]> {
     // Get the leaderboard
     let hours = await getHours()
     let elegible_hours = hours.filter(leaderboardFilters[settings.leaderboard_type])
-    let people: { [key: string]:any } = {}
+    let people: { [key: string]:LeaderboardEntry } = {}
     
     // Sum the hours for each person
     elegible_hours.forEach(row => {

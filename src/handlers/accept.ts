@@ -1,8 +1,7 @@
-import type { SlackActionMiddlewareArgs, BlockAction, ButtonAction, AllMiddlewareArgs } from "@slack/bolt"
-import type { Block } from "@slack/web-api"
-import { getAcceptedDm } from "."
-import { saveData } from ".."
-import { addHours } from "../utils//drive"
+import type { AllMiddlewareArgs, BlockAction, ButtonAction, KnownBlock, SlackActionMiddlewareArgs } from "@slack/bolt"
+import { formatDuration, sanitizeCodeblock } from "../messages"
+import { saveData } from "../utils/data"
+import { addHours } from "../utils/drive"
 
 
 
@@ -15,20 +14,20 @@ export async function handleAcceptButton({ ack, body, action, client }: SlackAct
     await Promise.all(Object.entries(time_request.requestMessages).map(async ([approver_id, request_message]) => {
         try {
             let message = (await client.conversations.history({ channel: request_message.channel, latest: request_message.ts, limit: 1, inclusive: true })).messages![0]
-            let oldBlocks = message.blocks!
+            let oldBlocks = message.blocks! as KnownBlock[]
             let footer_name = (body.user.id == approver_id) ? "You" : `<@${body.user.id}>`
             client.chat.update({
                 channel: request_message.channel,
                 ts: request_message.ts,
                 text: message.text + " (ACCEPTED)",
                 blocks: [
-                    oldBlocks[0] as Block,
-                    oldBlocks[1] as Block,
+                    oldBlocks[0],
+                    oldBlocks[1],
                     {
                         type: "section",
                         text: {
                             type: "mrkdwn",
-                            text: `*_:white_check_mark: Approved by ${footer_name} :white_check_mark:_*`
+                            text: `*_:white_check_mark: Accepted by ${footer_name} :white_check_mark:_*`
                         }
                     },
                     { "type": "divider" }
@@ -44,4 +43,7 @@ export async function handleAcceptButton({ ack, body, action, client }: SlackAct
     saveData()
 }
 
+const getAcceptedDm = (user, hours, activity) => {
+	return `:white_check_mark: *<@${user}>* accepted *${formatDuration(hours)}* :white_check_mark:\n>>>:person_climbing: *Activity:*\n\`${sanitizeCodeblock(activity)}\``
+}
 
