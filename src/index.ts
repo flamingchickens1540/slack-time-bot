@@ -1,16 +1,15 @@
 import { App } from "@slack/bolt";
 
 
-import "cron";
 import { CronJob } from "cron";
-import { v4 as uuidV4 } from "uuid";
-import { app_token, signing_secret, token } from '../secrets/slack_secrets.js';
-import { register_listeners } from "./handlers/index.js";
-import { getAllPendingRequestBlocks, getSubmittedAltText } from "./messages.js";
+import * as uuid from "uuid";
+import { app_token, signing_secret, token } from '../secrets/slack_secrets';
+import { register_listeners } from "./handlers/index";
+import { getAllPendingRequestBlocks, getSubmittedAltText } from "./messages";
+import type { HomeSettings } from './types';
 import { TimeRequest } from "./types";
-import type { HomeSettings } from './types.js';
-import { loadData, saveData } from "./utils/data.js";
-import { getRequestBlocks } from "./views/new_request.js";
+import { loadData, saveData } from "./utils/data";
+import { getRequestBlocks } from "./views/new_request";
 
 // Initialize global data
 declare global {
@@ -55,11 +54,11 @@ console.log("Cron Job Scheduled!")
 
 
 export async function handleHoursRequest(uid: string, hrs: number, activity: string) {
-    let user_info = await slack_app.client.users.info({user: uid});
+    let user_info = await slack_app.client.users.info({ user: uid });
     let name = user_info.user!.real_name!
-    
+
     // Create new request object
-    let request_id = uuidV4()
+    let request_id = uuid.v4()
     timeRequests[request_id] = {
         name: name,
         time: hrs,

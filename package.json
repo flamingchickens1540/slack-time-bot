@@ -1,20 +1,21 @@
 {
   "name": "slacktimebot",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "a flaming chickens slack bot for logging project hours",
-  "main": "index.js",
+  "main": "src/index",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node ."
+    "start": "node ./bot.cjs",
+    "build": "esbuild src/index.ts --bundle --outfile=bot.cjs --platform=node --minify"
   },
   "author": "Micah Powch",
   "repository": "https://github.com/flamingchickens1540/slack-time-bot",
   "license": "ISC",
-  "dependencies": {
+  "devDependencies": {
     "@slack/bolt": "^3.12.1",
     "@slack/web-api": "^6.0.0",
     "cron": "^1.8.2",
+    "esbuild": "^0.15.5",
     "google-spreadsheet": "^3.1.15",
     "tinyurl": "^1.1.7",
     "uuid": "^8.3.2"
