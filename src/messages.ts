@@ -20,9 +20,9 @@ export const noActivitySpecified = ":warning: I just blocked your submission wit
 /**
  * Gets a list of pending time requests
 */
-export const getAllPendingRequestBlocks = async (slack_client:WebClient) => {
+export const getAllPendingRequestBlocks = async (slack_client: WebClient) => {
 
-    let output:KnownBlock[] = [
+    let output: KnownBlock[] = [
         {
             "type": "header",
             "text": {
@@ -33,23 +33,25 @@ export const getAllPendingRequestBlocks = async (slack_client:WebClient) => {
         },
     ]
     await Promise.all(Object.values(timeRequests).map(async (person) => {
-        let permalink = await slack_client.chat.getPermalink({ channel: person.requestMessage.channel, message_ts: person.requestMessage.ts })
-        output.push({
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": `*${person.name}* - ${formatDuration(person.time)}\n\`${sanitizeCodeblock(person.activity)}\``,
-            },
-            "accessory": {
-                "type": "button",
+        slackApproverIDs.forEach(async (approver_id) => {
+            let permalink = await slack_client.chat.getPermalink({ channel: person.requestMessages[approver_id].channel, message_ts: person.requestMessages[approver_id].ts })
+            output.push({
+                "type": "section",
                 "text": {
-                    "type": "plain_text",
-                    "text": "Jump"
+                    "type": "mrkdwn",
+                    "text": `*${person.name}* - ${formatDuration(person.time)}\n\`${sanitizeCodeblock(person.activity)}\``,
                 },
-                "url": permalink.permalink,
-                "action_id": "jump_url"
-            }
-        }, {"type": "divider"})
+                "accessory": {
+                    "type": "button",
+                    "text": {
+                        "type": "plain_text",
+                        "text": "Jump"
+                    },
+                    "url": permalink.permalink,
+                    "action_id": "jump_url"
+                }
+            }, { "type": "divider" })
+        })
     }));
     return output
 }

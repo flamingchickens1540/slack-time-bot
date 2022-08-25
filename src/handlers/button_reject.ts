@@ -1,8 +1,9 @@
+import { AllMiddlewareArgs } from "@slack/bolt";
 import type{ WebClient } from "@slack/web-api";
 import type { ButtonActionMiddlewareArgs } from "../consts";
 import { getRejectMessageModal } from "../views/reject_message_view";
 
-export async function handleRejectButton({ ack, body, action, client }: ButtonActionMiddlewareArgs & { client: WebClient }) {
+export async function handleRejectButton({ ack, body, action, client }: ButtonActionMiddlewareArgs & AllMiddlewareArgs) {
     await ack()
     let requestInfo = timeRequests[action.value]
     try {

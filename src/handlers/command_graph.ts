@@ -1,4 +1,4 @@
-import type { SlackCommandMiddlewareArgs, SlackShortcutMiddlewareArgs } from "@slack/bolt";
+import type { AllMiddlewareArgs, SlackCommandMiddlewareArgs, SlackShortcutMiddlewareArgs } from "@slack/bolt";
 import type { KnownBlock, WebClient } from "@slack/web-api";
 import { PassThrough } from "stream";
 import { formatNames } from ".";
@@ -6,7 +6,7 @@ import { createChart } from "../utils/chart";
 import log_modal from "../views/log_view";
 
 
-export async function handleGraphCommand({ command, ack, respond, client }: SlackCommandMiddlewareArgs & { client: WebClient }) {
+export async function handleGraphCommand({ command, ack, respond, client }: SlackCommandMiddlewareArgs & AllMiddlewareArgs) {
     await ack({ response_type: 'ephemeral', text: 'Generating...' })
 
     let args = command.text.split(" ").filter(x => x.trim() != '')
