@@ -1,6 +1,6 @@
 import type { AllMiddlewareArgs, SlackEventMiddlewareArgs } from "@slack/bolt";
 import type { KnownBlock, WebClient } from "@slack/web-api";
-import { slack_admin_id } from "../consts";
+import { slack_admin_id } from "../../secrets/consts";
 import type { LeaderboardType, StaticSelectActionMiddlewareArgs } from "../types";
 import { saveData } from "../utils/data";
 import { settingsButton } from "../views/settings";

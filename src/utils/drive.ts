@@ -1,7 +1,9 @@
 import { readFileSync } from 'fs';
 import { GoogleSpreadsheet } from "google-spreadsheet";
 import type GoogleSpreadsheetWorksheet from 'google-spreadsheet/lib/GoogleSpreadsheetWorksheet';
-import { hours_sheet_id, log_sheet_name } from "../consts";
+import { hours_sheet_id } from '../../secrets/consts';
+import { log_sheet_name } from "../consts";
+
 import type { LogRow } from '../types';
 
 let googleDriveAuthed = false;
