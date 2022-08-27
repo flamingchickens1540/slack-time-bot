@@ -7,7 +7,9 @@
 	"scripts": {
 		"dev": "node --enable-source-maps ./bot.cjs",
 		"start": "node ./bot.cjs",
-		"build": "esbuild src/index.ts --bundle --outfile=bot.cjs --platform=node --minify --sourcemap"
+		"build": "esbuild src/index.ts --bundle --outfile=bot.cjs --platform=node --minify --sourcemap",
+		"lint": "eslint --ext .ts src",
+		"lint:report": "eslint --ext .ts --output-file eslint_report.json --format json src"
 	},
 	"author": "Micah Powch",
 	"repository": "https://github.com/flamingchickens1540/slack-time-bot",
