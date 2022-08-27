@@ -3,7 +3,7 @@ name: ESLint
 on: [pull_request, push]
 
 jobs:
-  node_test:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -35,5 +35,12 @@ jobs:
         with:
           name: eslint_report.json
           path: eslint_report.json
-      - name: Build project
+
+      - name: Rename example secrets
+        run: |
+          mv secrets/consts.example.js secrets/consts.js
+          mv secrets/slack_secrets.example.js secrets/slack_secrets.js
+        
+      - name: Build
         run: npm run build
+    
