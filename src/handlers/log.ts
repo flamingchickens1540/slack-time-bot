@@ -7,7 +7,7 @@ import log_modal from "../views/log";
 
 function parseTimeArg(arg: string, hours: number, actIndex: number): [number, number] {
     if (!isNaN(parseInt(arg.slice(0, arg.length - 1))) && arg.length != 1) {
-        let val = parseFloat(arg)
+        const val = parseFloat(arg)
         if (arg.slice(-1) === 'h') {
             hours += val;
         } else if (arg.slice(-1) === 'm') {
@@ -21,8 +21,8 @@ function parseTimeArg(arg: string, hours: number, actIndex: number): [number, nu
 export async function handleLogCommand({ command, logger, ack, respond, client }: SlackCommandMiddlewareArgs & AllMiddlewareArgs) {
     await ack()
 
-    var hours = 0, actStart = 0;
-    let args = command.text.split(" ")
+    let hours = 0, actStart = 0;
+    const args = command.text.split(" ")
     if (args.length === 0 || args[0] === '') {
         await client.views.open({
             view: log_modal,
@@ -34,12 +34,12 @@ export async function handleLogCommand({ command, logger, ack, respond, client }
         [hours, actStart] = parseTimeArg(args[0], hours, actStart);
         [hours, actStart] = parseTimeArg(args[1], hours, actStart);
 
-        let activity = args.slice(actStart, args.length).join(' ');
+        const activity = args.slice(actStart, args.length).join(' ');
         if (activity == '') {
             await respond({ response_type: 'ephemeral', text: noActivitySpecified })
             return
         }
-        let msg_txt = getSubmittedDm({ hours: hours, activity: activity });
+        const msg_txt = getSubmittedDm({ hours: hours, activity: activity });
         try {
             if (hours <= 0) {
                 await respond({ response_type: 'ephemeral', text: tooFewHours })
@@ -66,13 +66,13 @@ export async function handleLogModal({ ack, body, view, client, logger }: SlackV
 
     // Get the hours and task from the modal
     let hours = parseFloat(view.state.values.hours.hours.value ?? "0");
-    let activity = view.state.values.task.task.value ?? "Unknown";
+    const activity = view.state.values.task.task.value ?? "Unknown";
 
     // Ensure the time values are valid
     hours = isNaN(hours) ? 0 : hours;
 
     if (hours > 0) {
-        let message = getSubmittedDm({ hours: hours, activity: activity });
+        const message = getSubmittedDm({ hours: hours, activity: activity });
         try {
             await client.chat.postMessage({ channel: body.user.id, text: message })
         } catch (err) { logger.error("Failed to handle log modal:\n" + err) }

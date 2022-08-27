@@ -21,7 +21,7 @@ export const noActivitySpecified = ":warning: I just blocked your submission wit
 */
 export const getAllPendingRequestBlocks = async (slack_client: WebClient) => {
 
-    let output: KnownBlock[] = [
+    const output: KnownBlock[] = [
         {
             "type": "header",
             "text": {
@@ -33,7 +33,7 @@ export const getAllPendingRequestBlocks = async (slack_client: WebClient) => {
     ]
     await Promise.all(Object.values(timeRequests).map(async (person) => {
         slackApproverIDs.forEach(async (approver_id) => {
-            let permalink = await slack_client.chat.getPermalink({ channel: person.requestMessages[approver_id].channel, message_ts: person.requestMessages[approver_id].ts })
+            const permalink = await slack_client.chat.getPermalink({ channel: person.requestMessages[approver_id].channel, message_ts: person.requestMessages[approver_id].ts })
             output.push({
                 "type": "section",
                 "text": {
@@ -60,12 +60,12 @@ export function sanitizeCodeblock(activity: string): string {
 }
 export function formatDuration(hrs: number, mins?: number): string {
 	if (typeof (mins) === 'undefined') {
-		let mins_cached = hrs * 60
+		const mins_cached = hrs * 60
 		hrs = Math.floor(mins_cached / 60);
 		mins = Math.round(mins_cached % 60);
 	}
-	let hours = hrs === 1 ? '1 hour' : `${hrs} hours`
-	let minutes = mins === 1 ? '1 minute' : `${mins} minutes`
+	const hours = hrs === 1 ? '1 hour' : `${hrs} hours`
+	const minutes = mins === 1 ? '1 minute' : `${mins} minutes`
 
 	if (hrs === 0) {
 		return minutes

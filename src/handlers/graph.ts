@@ -6,10 +6,10 @@ import { createChart } from "../utils/chart";
 export async function handleGraphCommand({ command, ack, respond, client }: SlackCommandMiddlewareArgs & AllMiddlewareArgs) {
     await ack({ response_type: 'ephemeral', text: 'Generating...' })
 
-    let args = command.text.split(" ").filter(x => x.trim() != '')
+    const args = command.text.split(" ").filter(x => x.trim() != '')
     let users: string[] = []
     if (args.length == 0) {
-        let user = await client.users.info({ user: command.user_id })
+        const user = await client.users.info({ user: command.user_id })
         users = [user.user!.real_name!]
     } else if (args[0] == 'all') {
         users = args
@@ -17,15 +17,15 @@ export async function handleGraphCommand({ command, ack, respond, client }: Slac
         // Collect all user names from mentions
         await Promise.all(args.map(async arg => {
             // strip mention characters from user id
-            let user_id = arg.match(/<@([\w\d]+)\|.+>/)![1]
-            let user = await client.users.info({ user: user_id })
+            const user_id = arg.match(/<@([\w\d]+)\|.+>/)![1]
+            const user = await client.users.info({ user: user_id })
             if (user.ok && typeof (user.user!.real_name) !== 'undefined') {
                 users.push(user.user!.real_name)
             }
         }))
     }
 
-    let image_url = await createChart(users)
+    const image_url = await createChart(users)
     await respond({ text: "Hours graph", blocks: getGraphBlocks(image_url, command.user_id, users), response_type: 'in_channel' })
 }
 

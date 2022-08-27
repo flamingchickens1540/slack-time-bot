@@ -1,4 +1,4 @@
-import type { InputBlock, KnownBlock, ModalView, PlainTextOption, Select, StaticSelect } from "@slack/bolt";
+import type { InputBlock, KnownBlock, ModalView, PlainTextOption, StaticSelect } from "@slack/bolt";
 import type { Department } from "../types";
 import { slack_admin_id } from "../../secrets/consts";
 import { getSettings } from "../utils/data";
@@ -20,7 +20,7 @@ export const settingsButton: KnownBlock = {
 }
 
 export const getSettingsView = (user_id): ModalView => {
-    let blocks: KnownBlock[] = []
+    const blocks: KnownBlock[] = []
 
     if (slackApproverIDs.includes(user_id) || user_id == slack_admin_id) { blocks.push(...getSettingsBlocksApprovers()) }
     blocks.push(...getSettingsBlocksDepartment(user_id))
@@ -79,8 +79,8 @@ export const getSettingsBlocksApprovers = (): KnownBlock[] => {
 };
 
 export const getSettingsBlocksDepartment = (user_id: string): KnownBlock[] => {
-    let settings = getSettings(user_id)
-    let output: InputBlock = {
+    const settings = getSettings(user_id)
+    const output: InputBlock = {
         type: "input",
         label: {
             type: "plain_text",

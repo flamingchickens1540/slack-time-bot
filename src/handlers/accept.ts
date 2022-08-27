@@ -8,14 +8,14 @@ import { addHours } from "../utils/drive"
 
 export async function handleAcceptButton({ ack, logger, body, action, client }: SlackActionMiddlewareArgs<BlockAction<ButtonAction>> & AllMiddlewareArgs) {
     await ack()
-    let request_id = action.value
-    let time_request = timeRequests[request_id]
+    const request_id = action.value
+    const time_request = timeRequests[request_id]
 
     await Promise.all(Object.entries(time_request.requestMessages).map(async ([approver_id, request_message]) => {
         try {
-            let message = (await client.conversations.history({ channel: request_message.channel, latest: request_message.ts, limit: 1, inclusive: true })).messages![0]
-            let oldBlocks = message.blocks! as KnownBlock[]
-            let footer_name = (body.user.id == approver_id) ? "You" : `<@${body.user.id}>`
+            const message = (await client.conversations.history({ channel: request_message.channel, latest: request_message.ts, limit: 1, inclusive: true })).messages![0]
+            const oldBlocks = message.blocks! as KnownBlock[]
+            const footer_name = (body.user.id == approver_id) ? "You" : `<@${body.user.id}>`
             client.chat.update({
                 channel: request_message.channel,
                 ts: request_message.ts,

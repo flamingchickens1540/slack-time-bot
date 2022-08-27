@@ -14,10 +14,10 @@ import { getRequestBlocks } from "./views/new_request";
 
 // Initialize global data
 declare global {
-    var timeRequests: { [key: string]: TimeRequest };
-    var userSettings: { [key: string]: UserSettings };
-    var slackApproverIDs: string[];
-    var slack_client: WebClient;
+    let timeRequests: { [key: string]: TimeRequest };
+    let userSettings: { [key: string]: UserSettings };
+    let slackApproverIDs: string[];
+    let slack_client: WebClient;
 }
 
 loadData()
@@ -36,8 +36,8 @@ register_listeners(slack_app)
 slack_app.start().then(async () => {
     console.log("Bot started")
 
-    let users = await slack_client.users.list()
-    users.members!.forEach(async (member) => {
+    const users = await slack_client.users.list()
+    users.members?.forEach(async (member) => {
         if (!member.is_bot) {
             await ensureSettingsExist(member.id)
         }
@@ -48,7 +48,7 @@ slack_app.start().then(async () => {
 // Schedule Tasks
 
 const sendPendingPing = async () => {
-    var pendingRequests = Object.values(timeRequests)
+    const pendingRequests = Object.values(timeRequests)
     slackApproverIDs.forEach(async (approver_id) => {
         slack_app.client.chat.postMessage({
             channel: approver_id,
@@ -63,11 +63,11 @@ console.log("Cron Job Scheduled!")
 
 
 export async function handleHoursRequest(uid: string, hrs: number, activity: string) {
-    let user_info = await slack_app.client.users.info({ user: uid });
-    let name = user_info.user!.real_name!
+    const user_info = await slack_app.client.users.info({ user: uid });
+    const name = user_info.user!.real_name!
 
     // Create new request object
-    let request_id = uuid.v4()
+    const request_id = uuid.v4()
     timeRequests[request_id] = {
         name: name,
         time: hrs,
@@ -77,10 +77,10 @@ export async function handleHoursRequest(uid: string, hrs: number, activity: str
     }
 
     // Send request message to approvers
-    let blocks = getRequestBlocks(uid, hrs, activity, request_id)
+    const blocks = getRequestBlocks(uid, hrs, activity, request_id)
 
     await Promise.all(slackApproverIDs.map(async (approver_id) => {
-        let message = await slack_app.client.chat.postMessage({ channel: approver_id, text: getSubmittedAltText(name, hrs, activity), blocks: blocks })
+        const message = await slack_app.client.chat.postMessage({ channel: approver_id, text: getSubmittedAltText(name, hrs, activity), blocks: blocks })
         timeRequests[request_id].requestMessages[approver_id] = {
             channel: message.channel!,
             ts: message.ts!
@@ -88,4 +88,3 @@ export async function handleHoursRequest(uid: string, hrs: number, activity: str
     }))
     saveData()
 }
-

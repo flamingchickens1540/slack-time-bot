@@ -3,7 +3,6 @@ import type { LeaderboardType, LogRow, UserSettings } from "../types";
 import { getHours } from "../utils/drive";
 import { leaderboard_config } from "../consts";
 import { getSettings } from "../utils/data";
-import { WebClient } from "@slack/web-api";
 import { departmentTitles } from "./settings";
 
 type LeaderboardEntry = { name: string, hours: number }
@@ -11,10 +10,10 @@ type LeaderboardFilter = (value: LogRow, index: number, array: LogRow[]) => bool
 
 export async function getLeaderboardView(user: string): Promise<KnownBlock[]> {
 
-    let settings = getSettings(user)
+    const settings = getSettings(user)
     
     // Get the leaderboard
-    let hours = await getHours()
+    const hours = await getHours()
     
     let leaderboard_candidates:LeaderboardEntry[]
     switch (settings.leaderboard_type) {
@@ -28,32 +27,31 @@ export async function getLeaderboardView(user: string): Promise<KnownBlock[]> {
     
     
     // Sort the people by hours, reversed
-    let leaderboard_data = leaderboard_candidates.sort((a, b) => b.hours - a.hours).slice(0, 10)
+    const leaderboard_data = leaderboard_candidates.sort((a, b) => b.hours - a.hours).slice(0, 10)
     return getLeaderboardViewBlocks(leaderboard_data, settings.leaderboard_type)
 }
 
 
-const getLeaderboardViewBlocks = (leaderboard_entries: { name: string, hours: number }[], currentMetric: LeaderboardType, entryCount?: number): KnownBlock[] => {
-    entryCount = entryCount ?? 10
-    let fields: MrkdwnElement[] = []
+const getLeaderboardViewBlocks = (leaderboard_entries: { name: string, hours: number }[], currentMetric: LeaderboardType): KnownBlock[] => {
+    const fields: MrkdwnElement[] = []
     // Calculate padding amounts
     let name_padding = 0
     let time_padding = 0
     let max_hours = 0
 
     leaderboard_entries.forEach((entry, index) => {
-        let name_length = entry.name.length+(index+1).toString().length+2
+        const name_length = entry.name.length+(index+1).toString().length+2
         if (name_length > name_padding) name_padding = name_length
 
-        let time_length = entry.hours.toFixed(1).length+6
+        const time_length = entry.hours.toFixed(1).length+6
         if (time_length > time_padding) time_padding = time_length
 
         if (entry.hours > max_hours) max_hours = entry.hours
     })
     leaderboard_entries.forEach((entry, index) => {
-        let name_text = `${index + 1}) ${entry.name}`.padEnd(name_padding)
-        let hour_text = `${entry.hours.toFixed(1)} hours`.padEnd(time_padding)
-        let bar_length = Math.round(entry.hours/max_hours*leaderboard_config.max_bar_length)
+        const name_text = `${index + 1}) ${entry.name}`.padEnd(name_padding)
+        const hour_text = `${entry.hours.toFixed(1)} hours`.padEnd(time_padding)
+        const bar_length = Math.round(entry.hours/max_hours*leaderboard_config.max_bar_length)
         let bar = ""
         bar += ":large_red_square:".repeat(Math.min(bar_length, leaderboard_config.max_r))
         bar += ":large_orange_square:".repeat(Math.max(Math.min(bar_length-leaderboard_config.max_r, leaderboard_config.max_o),0))
@@ -76,9 +74,9 @@ const getLeaderboardViewBlocks = (leaderboard_entries: { name: string, hours: nu
             text: "No entries found",
         })
     }
-    let fieldGroups: SectionBlock[] = []
+    const fieldGroups: SectionBlock[] = []
     for (let index = 0; index < fields.length; index += 10) {
-        let chunk = fields.slice(index, index + 10);
+        const chunk = fields.slice(index, index + 10);
         fieldGroups.push({
             type: "section",
             fields: chunk
@@ -162,8 +160,8 @@ const metrics: { [key in LeaderboardType]: PlainTextOption } = {
 }
 
 function getCandidatesFromFilter(hours:LogRow[], filter:LeaderboardFilter):LeaderboardEntry[] {
-    let elegible_hours = hours.filter(filter)
-    let people: { [key: string]:LeaderboardEntry } = {}
+    const elegible_hours = hours.filter(filter)
+    const people: { [key: string]:LeaderboardEntry } = {}
     
     // Sum the hours for each person
     elegible_hours.forEach(row => {
@@ -176,8 +174,8 @@ function getCandidatesFromFilter(hours:LogRow[], filter:LeaderboardFilter):Leade
 }
 
 function getDepartmentHours(hours:LogRow[]):LeaderboardEntry[] {
-    let departments: { [key: string]:{members:{[key:string]:boolean}, hours:number} } = {}
-    let userCache:{[key:string]:string}= {}
+    const departments: { [key: string]:{members:{[key:string]:boolean}, hours:number} } = {}
+    const userCache:{[key:string]:string}= {}
     hours.forEach(row => {
         let user_id:string
         let settings:UserSettings
@@ -186,7 +184,7 @@ function getDepartmentHours(hours:LogRow[]):LeaderboardEntry[] {
             settings = getSettings(user_id)
         } else {
             // Find the user's settings
-            let results = Object!.entries(userSettings).find(([key, value]) => value.real_name == row.name)
+            const results = Object.entries(userSettings).find(([, value]) => value.real_name == row.name)
             if (results == null) {
                 return
             }
@@ -207,10 +205,10 @@ function getDepartmentHours(hours:LogRow[]):LeaderboardEntry[] {
     })
 }
 
-const getTotalHoursLeaderboard: LeaderboardFilter = (value) => { return true }
+const getTotalHoursLeaderboard: LeaderboardFilter = () => true
 const getWeeklyHoursLeaderboard: LeaderboardFilter = (value) => {
     // Get date 7 days ago
-    let date = new Date().getTime() - (7 * 24 * 60 * 60 * 1000)
+    const date = new Date().getTime() - (7 * 24 * 60 * 60 * 1000)
     return value.time_out.getTime() > date
 }
 const getExternalHoursLeaderboard: LeaderboardFilter = (value) => { return value.type == 'external' }

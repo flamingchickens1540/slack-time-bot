@@ -1,6 +1,5 @@
 import { existsSync, readFileSync, writeFile } from 'fs';
 import { json_data_path } from '../consts';
-import { v4 as uuidV4 } from "uuid";
 import { UserSettings } from '../types';
 
 export async function saveData() {
@@ -33,7 +32,7 @@ export function getSettings(user_id):UserSettings {
 
 export async function ensureSettingsExist(user_id) {
     if (typeof (userSettings[user_id]) === 'undefined') {
-        let user = await slack_client.users.info({ user: user_id })
+        const user = await slack_client.users.info({ user: user_id })
         userSettings[user_id] = {
             leaderboard_type: "department",
             real_name: user.user!.real_name!

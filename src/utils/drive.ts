@@ -23,7 +23,7 @@ let sheet: GoogleSpreadsheetWorksheet
 export async function addHours(name, hours, activity) {
     if (!googleDriveAuthed) return;
     await sheet.loadCells()
-    let currentTime = Date.now() / 1000
+    const currentTime = Date.now() / 1000
     // Add to sheet
     try {
         await sheet.loadCells()
@@ -38,7 +38,7 @@ export async function addHours(name, hours, activity) {
 export async function getHours(): Promise<LogRow[]> {
     if (!googleDriveAuthed) return [];
     await sheet.loadCells()
-    let rows = await sheet.getRows()
+    const rows = await sheet.getRows()
     return rows.map(row => {
         return {
             time_in: new Date(parseInt(row._rawData[0]+ "000")),
