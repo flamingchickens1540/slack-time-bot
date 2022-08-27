@@ -1,4 +1,5 @@
 import { App } from "@slack/bolt";
+import { WebClient } from "@slack/web-api";
 
 
 import { CronJob } from "cron";
@@ -6,16 +7,17 @@ import * as uuid from "uuid";
 import { app_token, signing_secret, token } from '../secrets/slack_secrets';
 import { register_listeners } from "./handlers/index";
 import { getAllPendingRequestBlocks, getSubmittedAltText } from "./messages";
-import type { HomeSettings } from './types';
+import type { UserSettings } from './types';
 import { TimeRequest } from "./types";
-import { loadData, saveData } from "./utils/data";
+import { ensureSettingsExist, loadData, saveData } from "./utils/data";
 import { getRequestBlocks } from "./views/new_request";
 
 // Initialize global data
 declare global {
     var timeRequests: { [key: string]: TimeRequest };
-    var homeSettings: { [key: string]: HomeSettings };
+    var userSettings: { [key: string]: UserSettings };
     var slackApproverIDs: string[];
+    var slack_client: WebClient;
 }
 
 loadData()
@@ -28,11 +30,18 @@ const slack_app = new App({
     socketMode: true,
     appToken: app_token,
 });
-
+slack_client = slack_app.client;
 register_listeners(slack_app)
 
 slack_app.start().then(async () => {
     console.log("Bot started")
+
+    let users = await slack_client.users.list()
+    users.members!.forEach(async (member) => {
+        if (!member.is_bot) {
+            await ensureSettingsExist(member.id)
+        }
+    })
 })
 
 

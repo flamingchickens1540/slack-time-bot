@@ -20,14 +20,14 @@ let sheet: GoogleSpreadsheetWorksheet
     googleDriveAuthed = true;
 })
 
-export async function addHours(name, hours) {
+export async function addHours(name, hours, activity) {
     if (!googleDriveAuthed) return;
     await sheet.loadCells()
     let currentTime = Date.now() / 1000
     // Add to sheet
     try {
         await sheet.loadCells()
-        await sheet.addRow([currentTime, currentTime, name, hours.toFixed(2), 'external'])
+        await sheet.addRow([currentTime, currentTime, name, hours.toFixed(2), activity])
         await sheet.saveUpdatedCells()
     } catch (e) {
         console.error(`Could not add time for ${name}`)
@@ -45,7 +45,7 @@ export async function getHours(): Promise<LogRow[]> {
             time_out: new Date(parseInt(row._rawData[1]+ "000")),
             name: row._rawData[2],
             hours: parseFloat(row._rawData[3]),
-            type: row._rawData[4],
+            type: row._rawData[4] == "lab"? "lab":"external",
         }
     })
 }

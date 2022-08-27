@@ -1,36 +1,34 @@
-import type { KnownBlock, MrkdwnElement, PlainTextElement, PlainTextOption, SectionBlock } from "@slack/bolt";
-import type { LeaderboardType, LogRow } from "../types";
+import type { KnownBlock, MrkdwnElement, PlainTextOption, SectionBlock } from "@slack/bolt";
+import type { LeaderboardType, LogRow, UserSettings } from "../types";
 import { getHours } from "../utils/drive";
 import { leaderboard_config } from "../consts";
+import { getSettings } from "../utils/data";
+import { WebClient } from "@slack/web-api";
+import { departmentTitles } from "./settings";
+
 type LeaderboardEntry = { name: string, hours: number }
 type LeaderboardFilter = (value: LogRow, index: number, array: LogRow[]) => boolean
 
 export async function getLeaderboardView(user: string): Promise<KnownBlock[]> {
-    if (typeof (homeSettings[user]) === 'undefined') {
-        homeSettings[user] = {
-            leaderboard_type: 'total'
-        }
-    }
-    
-    let settings = homeSettings[user]
+
+    let settings = getSettings(user)
     
     // Get the leaderboard
     let hours = await getHours()
-    let elegible_hours = hours.filter(leaderboardFilters[settings.leaderboard_type])
-    let people: { [key: string]:LeaderboardEntry } = {}
     
-    // Sum the hours for each person
-    elegible_hours.forEach(row => {
-        if (typeof (people[row.name]) === 'undefined') {
-            people[row.name] = { name: row.name, hours: 0 }
-        }
-        people[row.name].hours += row.hours
-    })
+    let leaderboard_candidates:LeaderboardEntry[]
+    switch (settings.leaderboard_type) {
+        case "department":
+            leaderboard_candidates = getDepartmentHours(hours)
+            break;
+        default:
+            leaderboard_candidates = getCandidatesFromFilter(hours, leaderboardFilters[settings.leaderboard_type])
+            break;
+    }
+    
     
     // Sort the people by hours, reversed
-    let sorted = Object.values(people).sort((a, b) => b.hours - a.hours).slice(0, 10)
-    let leaderboard_data = sorted.map(({ name, hours }) => ({ name: name, hours: hours }))
-    
+    let leaderboard_data = leaderboard_candidates.sort((a, b) => b.hours - a.hours).slice(0, 10)
     return getLeaderboardViewBlocks(leaderboard_data, settings.leaderboard_type)
 }
 
@@ -120,7 +118,15 @@ const getLeaderboardViewBlocks = (leaderboard_entries: { name: string, hours: nu
     ]
 };
 
-const metrics: { [key: string]: PlainTextOption } = {
+const metrics: { [key in LeaderboardType]: PlainTextOption } = {
+    department: {
+        text: {
+            type: "plain_text",
+            text: "Department",
+            emoji: true
+        },
+        value: "department"
+    },
     total: {
         text: {
             type: "plain_text",
@@ -154,6 +160,53 @@ const metrics: { [key: string]: PlainTextOption } = {
         value: "external"
     }
 }
+
+function getCandidatesFromFilter(hours:LogRow[], filter:LeaderboardFilter):LeaderboardEntry[] {
+    let elegible_hours = hours.filter(filter)
+    let people: { [key: string]:LeaderboardEntry } = {}
+    
+    // Sum the hours for each person
+    elegible_hours.forEach(row => {
+        if (typeof (people[row.name]) === 'undefined') {
+            people[row.name] = { name: row.name, hours: 0 }
+        }
+        people[row.name].hours += row.hours
+    })
+    return Object.values(people)
+}
+
+function getDepartmentHours(hours:LogRow[]):LeaderboardEntry[] {
+    let departments: { [key: string]:{members:{[key:string]:boolean}, hours:number} } = {}
+    let userCache:{[key:string]:string}= {}
+    hours.forEach(row => {
+        let user_id:string
+        let settings:UserSettings
+        if (row.name in userCache) {
+            user_id = userCache[row.name]
+            settings = getSettings(user_id)
+        } else {
+            // Find the user's settings
+            let results = Object!.entries(userSettings).find(([key, value]) => value.real_name == row.name)
+            if (results == null) {
+                return
+            }
+            settings = results[1]
+            userCache[row.name] = results[0]
+        }
+        if (typeof(settings.department) === 'undefined') {
+            return
+        }
+        if (typeof (departments[settings.department]) === 'undefined') {
+            departments[settings.department] = { members: {}, hours: 0 }
+        }
+        departments[settings.department].hours += row.hours
+        departments[settings.department].members[row.name] = true
+    })
+    return Object.entries(departments).map(([name, data]) => {
+        return { name: departmentTitles[name], hours: data.hours/Object.values(data.members).length }
+    })
+}
+
 const getTotalHoursLeaderboard: LeaderboardFilter = (value) => { return true }
 const getWeeklyHoursLeaderboard: LeaderboardFilter = (value) => {
     // Get date 7 days ago
@@ -163,7 +216,7 @@ const getWeeklyHoursLeaderboard: LeaderboardFilter = (value) => {
 const getExternalHoursLeaderboard: LeaderboardFilter = (value) => { return value.type == 'external' }
 const getLabHoursLeaderboard: LeaderboardFilter = (value) => { return value.type == 'lab' }
 
-const leaderboardFilters: { [key: string]: LeaderboardFilter } = {
+const leaderboardFilters: { [key:string]: LeaderboardFilter } = {
     'total': getTotalHoursLeaderboard,
     'weekly': getWeeklyHoursLeaderboard,
     'external': getExternalHoursLeaderboard,

@@ -3,8 +3,8 @@ import type { SlackActionMiddlewareArgs, BlockAction, ButtonAction, StaticSelect
 export type ButtonActionMiddlewareArgs = SlackActionMiddlewareArgs<BlockAction<ButtonAction>>;
 export type StaticSelectActionMiddlewareArgs = SlackActionMiddlewareArgs<BlockAction<StaticSelectAction>>;
 
-export type LeaderboardType = "total" | "weekly" | "lab" | "external"
-
+export type LeaderboardType = "total" | "weekly" | "lab" | "external" | "department"
+export type Department = "fab" | "controls" | "robotsw" | "community" | "companal" | "outreach"
 export type TimeRequest = {
     name: string;
     time: number;
@@ -26,6 +26,8 @@ export type LogRow = {
     type: "lab" | "external"
 }
 
-export type HomeSettings = {
+export type UserSettings = {
     leaderboard_type: LeaderboardType,
+    department?: Department,
+    readonly real_name: string,
 }

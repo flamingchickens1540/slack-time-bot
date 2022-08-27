@@ -36,7 +36,7 @@ export async function handleAcceptButton({ ack, logger, body, action, client }: 
         } catch (err) { logger.error("Failed to handle reject modal:\n" + err) }
     }))
 
-    addHours(time_request.name, time_request.time)
+    addHours(time_request.name, time_request.time, time_request.activity)
 
     await client.chat.postMessage({ channel: time_request.userId, text: getAcceptedDm(body.user.id, time_request.time, time_request.activity) })
     delete timeRequests[request_id]

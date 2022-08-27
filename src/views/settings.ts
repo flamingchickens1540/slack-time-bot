@@ -1,4 +1,7 @@
-import type { KnownBlock, ModalView } from "@slack/bolt";
+import type { InputBlock, KnownBlock, ModalView, PlainTextOption, Select, StaticSelect } from "@slack/bolt";
+import type { Department } from "../types";
+import { slack_admin_id } from "../../secrets/consts";
+import { getSettings } from "../utils/data";
 
 
 export const settingsButton: KnownBlock = {
@@ -16,7 +19,12 @@ export const settingsButton: KnownBlock = {
     ]
 }
 
-export const getSettingsView = (): ModalView => {
+export const getSettingsView = (user_id): ModalView => {
+    let blocks: KnownBlock[] = []
+
+    if (slackApproverIDs.includes(user_id) || user_id == slack_admin_id) { blocks.push(...getSettingsBlocksApprovers()) }
+    blocks.push(...getSettingsBlocksDepartment(user_id))
+
     return {
         type: "modal",
         callback_id: "save_settings",
@@ -35,28 +43,28 @@ export const getSettingsView = (): ModalView => {
             text: "Cancel",
             emoji: true
         },
-        blocks: getSettingsViewBlocks()
+        blocks: blocks
     }
 }
-export const getSettingsViewBlocks = (): KnownBlock[] => {
+export const getSettingsBlocksApprovers = (): KnownBlock[] => {
     return [
         {
             type: "header",
             text: {
                 type: "plain_text",
-                text: "External Hour Approvers",
+                text: "Settings",
                 emoji: true
             },
         },
         {
             block_id: "approver_selector",
-            type: "section",
-            fields: [{
+            type: "input",
+            label: {
                 type: "plain_text",
-                text: " ",
+                text: "External Hour Approvers",
                 emoji: true
-            }],
-            accessory: {
+            },
+            element: {
                 type: "multi_users_select",
                 placeholder: {
                     type: "plain_text",
@@ -68,6 +76,93 @@ export const getSettingsViewBlocks = (): KnownBlock[] => {
             }
         },
     ]
-
 };
+
+export const getSettingsBlocksDepartment = (user_id: string): KnownBlock[] => {
+    let settings = getSettings(user_id)
+    let output: InputBlock = {
+        type: "input",
+        label: {
+            type: "plain_text",
+            text: "Select your primary department",
+            emoji: true
+        },
+        block_id: "department_selector",
+        element: {
+            type: "static_select",
+            placeholder: {
+                type: "plain_text",
+                text: "Select an item",
+                emoji: true
+            },
+            options: Object.values(departmentOptions),
+            action_id: "selected_department"
+        }
+    }
+    if (settings.department != null) {
+        (output.element as StaticSelect).initial_option = departmentOptions[settings.department]
+    }
+    return [output]
+};
+
+
+export const departmentTitles: { [key in Department]: string } = {
+    fab: "Fabrication",
+    controls: "Controls",
+    robotsw: "Robot Software",
+    community: "Community Engineering",
+    companal: "Competetive Analysis",
+    outreach: "Outreach"
+}
+
+const departmentOptions: { [key in Department]: PlainTextOption } = {
+    fab: {
+        text: {
+            type: "plain_text",
+            text: departmentTitles.fab,
+            emoji: true
+        },
+        value: "fab"
+    },
+    controls: {
+        text: {
+            type: "plain_text",
+            text: departmentTitles.controls,
+            emoji: true
+        },
+        value: "controls"
+    },
+    robotsw: {
+        text: {
+            type: "plain_text",
+            text: departmentTitles.robotsw,
+            emoji: true
+        },
+        value: "robotsw"
+    },
+    community: {
+        text: {
+            type: "plain_text",
+            text: departmentTitles.community,
+            emoji: true
+        },
+        value: "community"
+    },
+    companal: {
+        text: {
+            type: "plain_text",
+            text: departmentTitles.companal,
+            emoji: true
+        },
+        value: "companal"
+    },
+    outreach: {
+        text: {
+            type: "plain_text",
+            text: departmentTitles.outreach,
+            emoji: true
+        },
+        value: "outreach"
+    }
+}
 

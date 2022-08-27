@@ -10,5 +10,3 @@ export const leaderboard_config = {
     max_y: Math.floor(max_bar_length/3)
 }
     
-    
-    
