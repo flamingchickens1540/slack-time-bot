@@ -5,9 +5,9 @@
 	"main": "src/index",
 	"type": "module",
 	"scripts": {
-		"dev": "node --enable-source-maps ./bot.cjs",
-		"start": "node ./bot.cjs",
-		"build": "esbuild src/index.ts --bundle --outfile=bot.cjs --platform=node --minify --sourcemap",
+		"start": "node ./dist/index.cjs",
+		"start:dev": "npm run build && node --enable-source-maps ./dist/index.cjs",
+		"build": "esbuild src/index.ts --bundle --outfile=./dist/index.cjs --platform=node --minify --sourcemap",
 		"lint": "eslint --ext .ts src",
 		"lint:report": "eslint --ext .ts --output-file eslint_report.json --format json src"
 	},
