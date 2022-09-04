@@ -1,7 +1,7 @@
 import type { AllMiddlewareArgs, KnownBlock, SlackViewMiddlewareArgs, ViewSubmitAction } from "@slack/bolt";
 import type { ButtonActionMiddlewareArgs } from "../types";
 import { formatDuration, sanitizeCodeblock } from "../messages";
-import { saveData } from "../utils/data";
+import { saveData, data } from "../utils/data";
 import { getRejectMessageModal } from "../views/reject";
 
 
@@ -9,7 +9,7 @@ import { getRejectMessageModal } from "../views/reject";
 
 export async function handleRejectButton({ ack, body, action, client, logger }: ButtonActionMiddlewareArgs & AllMiddlewareArgs) {
     await ack()
-    const requestInfo = timeRequests[action.value]
+    const requestInfo = data.timeRequests[action.value]
     try {
         client.views.open({
             trigger_id: body.trigger_id,
@@ -23,7 +23,7 @@ export async function handleRejectButton({ ack, body, action, client, logger }: 
 export async function handleRejectModal({ ack, body, view, client, logger }: SlackViewMiddlewareArgs<ViewSubmitAction> & AllMiddlewareArgs) {
     await ack()
     const request_id = view.private_metadata
-    const timeRequest = timeRequests[request_id]
+    const timeRequest = data.timeRequests[request_id]
     await Promise.all(Object.entries(timeRequest.requestMessages).map(async ([approver_id, request_message]) => {
         try {
             const message = (await client.conversations.history({ channel: request_message.channel, latest: request_message.ts, limit: 1, inclusive: true })).messages![0]

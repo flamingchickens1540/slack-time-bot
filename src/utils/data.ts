@@ -1,39 +1,45 @@
 import { existsSync, readFileSync, writeFile } from 'fs';
+import { slack_client } from '..';
 import { json_data_path } from '../consts';
-import { UserSettings } from '../types';
+import { TimeRequest, UserSettings } from '../types';
 
+export let data:Data
+type Data = {
+    timeRequests: { [key: string]: TimeRequest }
+    userSettings: { [key: string]: UserSettings }
+    slackApproverIDs: string[]
+}
 export async function saveData() {
-    writeFile(json_data_path, JSON.stringify({ time_requests: timeRequests, user_settings: userSettings, slack_approvers: slackApproverIDs }), (err) => { console.log(err) })
+    writeFile(json_data_path, JSON.stringify(data), (err) => { console.log(err) })
 }
 
 export function loadData() {
     if (existsSync(json_data_path)) {
-        let data
         try {
             data = JSON.parse(readFileSync(json_data_path, 'utf-8'))
-        } catch (err) {
-            data = { time_requests: {}, user_settings: {}, slack_approvers: [] }
-        }
-        timeRequests = data["time_requests"]
-        userSettings = data["user_settings"]
-        slackApproverIDs = data["slack_approvers"]
+        } catch (err) { initData() }
     } else {
-        timeRequests = {}
-        userSettings = {}
-        slackApproverIDs = []
-        saveData()
+        initData()
     }
+}
+function initData() {
+    data = {
+        timeRequests: {},
+        userSettings: {},
+        slackApproverIDs: []
+    }
+    saveData()
 }
 
 export function getSettings(user_id):UserSettings {
     ensureSettingsExist(user_id)
-    return userSettings[user_id]
+    return data.userSettings[user_id]
 }
 
 export async function ensureSettingsExist(user_id) {
-    if (typeof (userSettings[user_id]) === 'undefined') {
+    if (typeof (data.userSettings[user_id]) === 'undefined') {
         const user = await slack_client.users.info({ user: user_id })
-        userSettings[user_id] = {
+        data.userSettings[user_id] = {
             leaderboard_type: "department",
             real_name: user.user!.real_name!
         }

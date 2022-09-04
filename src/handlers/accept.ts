@@ -1,6 +1,6 @@
 import type { AllMiddlewareArgs, BlockAction, ButtonAction, KnownBlock, SlackActionMiddlewareArgs } from "@slack/bolt"
 import { formatDuration, sanitizeCodeblock } from "../messages"
-import { saveData } from "../utils/data"
+import { saveData, data } from "../utils/data"
 import { addHours } from "../utils/drive"
 
 
@@ -9,7 +9,7 @@ import { addHours } from "../utils/drive"
 export async function handleAcceptButton({ ack, logger, body, action, client }: SlackActionMiddlewareArgs<BlockAction<ButtonAction>> & AllMiddlewareArgs) {
     await ack()
     const request_id = action.value
-    const time_request = timeRequests[request_id]
+    const time_request = data.timeRequests[request_id]
 
     await Promise.all(Object.entries(time_request.requestMessages).map(async ([approver_id, request_message]) => {
         try {
@@ -39,7 +39,7 @@ export async function handleAcceptButton({ ack, logger, body, action, client }: 
     addHours(time_request.name, time_request.time, time_request.activity)
 
     await client.chat.postMessage({ channel: time_request.userId, text: getAcceptedDm(body.user.id, time_request.time, time_request.activity) })
-    delete timeRequests[request_id]
+    delete data.timeRequests[request_id]
     saveData()
 }
 

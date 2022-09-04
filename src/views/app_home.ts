@@ -2,7 +2,7 @@ import type { KnownBlock, MrkdwnElement, PlainTextOption, SectionBlock } from "@
 import type { LeaderboardType, LogRow, UserSettings } from "../types";
 import { getHours } from "../utils/drive";
 import { leaderboard_config } from "../consts";
-import { getSettings } from "../utils/data";
+import { getSettings, data } from "../utils/data";
 import { departmentTitles } from "./settings";
 
 type LeaderboardEntry = { name: string, hours: number }
@@ -184,7 +184,7 @@ function getDepartmentHours(hours:LogRow[]):LeaderboardEntry[] {
             settings = getSettings(user_id)
         } else {
             // Find the user's settings
-            const results = Object.entries(userSettings).find(([, value]) => value.real_name == row.name)
+            const results = Object.entries(data.userSettings).find(([, value]) => value.real_name == row.name)
             if (results == null) {
                 return
             }

@@ -1,7 +1,7 @@
 import type { AllMiddlewareArgs, SlackViewMiddlewareArgs, ViewSubmitAction } from "@slack/bolt"
 import { slack_admin_id } from "../../secrets/consts"
 import type { ButtonActionMiddlewareArgs, Department } from "../types"
-import { ensureSettingsExist, saveData } from "../utils/data"
+import { ensureSettingsExist, saveData, data } from "../utils/data"
 import { getSettingsView } from "../views/settings"
 import { publishDefaultHomeView } from "./app_home"
 
@@ -18,11 +18,11 @@ export async function handleOpenSettingsModal({ ack, client, body, logger }: But
 
 export async function handleSettingsSave({ack, view, body, client}:SlackViewMiddlewareArgs<ViewSubmitAction> & AllMiddlewareArgs) {
     await ack()
-    if (slackApproverIDs.includes(body.user.id) || body.user.id == slack_admin_id) {
-        slackApproverIDs = view.state.values.approver_selector.selected_users.selected_users!
+    if (data.slackApproverIDs.includes(body.user.id) || body.user.id == slack_admin_id) {
+        data.slackApproverIDs = view.state.values.approver_selector.selected_users.selected_users!
     }
     ensureSettingsExist(body.user.id)
-    userSettings[body.user.id].department = view.state.values.department_selector.selected_department.selected_option!.value! as Department
+    data.userSettings[body.user.id].department = view.state.values.department_selector.selected_department.selected_option!.value! as Department
     await saveData()
     await publishDefaultHomeView(body.user.id, client)
 }

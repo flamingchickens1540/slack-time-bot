@@ -1,4 +1,5 @@
 import type { KnownBlock, WebClient } from "@slack/web-api"
+import { data } from "./utils/data"
 
 /** 
 * Push notification message for when a time request is submitted
@@ -31,8 +32,8 @@ export const getAllPendingRequestBlocks = async (slack_client: WebClient) => {
             }
         },
     ]
-    await Promise.all(Object.values(timeRequests).map(async (person) => {
-        slackApproverIDs.forEach(async (approver_id) => {
+    await Promise.all(Object.values(data.timeRequests).map(async (person) => {
+        data.slackApproverIDs.forEach(async (approver_id) => {
             const permalink = await slack_client.chat.getPermalink({ channel: person.requestMessages[approver_id].channel, message_ts: person.requestMessages[approver_id].ts })
             output.push({
                 "type": "section",
