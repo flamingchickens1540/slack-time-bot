@@ -1,4 +1,4 @@
-name: ESLint
+name: CI
 
 on: [pull_request, push]
 
@@ -36,11 +36,24 @@ jobs:
           name: eslint_report.json
           path: eslint_report.json
 
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: 'npm'
+      - name: Install Node Dependencies
+        run: npm ci
+        env:
+          CI: TRUE
       - name: Rename example secrets
         run: |
           mv secrets/consts.example.js secrets/consts.js
           mv secrets/slack_secrets.example.js secrets/slack_secrets.js
-        
       - name: Build
         run: npm run build
-    
+  
