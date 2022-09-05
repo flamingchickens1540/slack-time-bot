@@ -42,6 +42,7 @@ slack_app.start().then(async () => {
 
 const sendPendingPing = async () => {
     const pendingRequests = Object.values(data.timeRequests)
+    if (pendingRequests.length == 0) return
     data.slackApproverIDs.forEach(async (approver_id) => {
         slack_app.client.chat.postMessage({
             channel: approver_id,
