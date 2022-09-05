@@ -1,6 +1,6 @@
 import { GoogleSpreadsheet } from "google-spreadsheet";
 import type GoogleSpreadsheetWorksheet from 'google-spreadsheet/lib/GoogleSpreadsheetWorksheet';
-import { cluck_baseurl, hours_sheet_id } from '../../secrets/consts';
+import { cluck_baseurl, hours_sheet_id, cluck_api_key } from '../../secrets/consts';
 import { log_sheet_name } from "../consts";
 import google_client_secret from '../../secrets/client_secret.json';
 import type { LogRow } from '../types';
@@ -29,7 +29,8 @@ export async function addHours(name, hours, activity){
         body: JSON.stringify({
             name:name,
             hours:hours,
-            activity:activity
+            activity:activity,
+            api_key:cluck_api_key
         })
     })
 
