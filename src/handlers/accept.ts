@@ -11,6 +11,17 @@ export async function handleAcceptButton({ ack, logger, body, action, client }: 
     const request_id = action.value
     const time_request = data.timeRequests[request_id]
 
+    
+    try {
+        await addHours(time_request.name, time_request.time, time_request.activity)
+    } catch {
+        logger.error("Failed to add hours with request", time_request)
+        return
+    }
+    delete data.timeRequests[request_id]
+    saveData()
+    
+    await client.chat.postMessage({ channel: time_request.userId, text: getAcceptedDm(body.user.id, time_request.time, time_request.activity) })
     await Promise.all(Object.entries(time_request.requestMessages).map(async ([approver_id, request_message]) => {
         try {
             const message = (await client.conversations.history({ channel: request_message.channel, latest: request_message.ts, limit: 1, inclusive: true })).messages![0]
@@ -35,12 +46,7 @@ export async function handleAcceptButton({ ack, logger, body, action, client }: 
             })
         } catch (err) { logger.error("Failed to handle reject modal:\n" + err) }
     }))
-
-    addHours(time_request.name, time_request.time, time_request.activity)
-
-    await client.chat.postMessage({ channel: time_request.userId, text: getAcceptedDm(body.user.id, time_request.time, time_request.activity) })
-    delete data.timeRequests[request_id]
-    saveData()
+    
 }
 
 const getAcceptedDm = (user, hours, activity) => {

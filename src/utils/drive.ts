@@ -1,17 +1,16 @@
-import { readFileSync } from 'fs';
 import { GoogleSpreadsheet } from "google-spreadsheet";
 import type GoogleSpreadsheetWorksheet from 'google-spreadsheet/lib/GoogleSpreadsheetWorksheet';
-import { hours_sheet_id } from '../../secrets/consts';
+import { cluck_baseurl, hours_sheet_id } from '../../secrets/consts';
 import { log_sheet_name } from "../consts";
-
+import google_client_secret from '../../secrets/client_secret.json';
 import type { LogRow } from '../types';
+import fetch from 'node-fetch';
 
 let googleDriveAuthed = false;
 let sheet: GoogleSpreadsheetWorksheet
 
 // Initialize Google Drive client
 (async () => {
-    const google_client_secret = JSON.parse(readFileSync('./secrets/client_secret.json', 'utf-8'))
     const doc = new GoogleSpreadsheet(hours_sheet_id)
     await doc.useServiceAccountAuth(google_client_secret)
     await doc.loadInfo()
@@ -20,18 +19,22 @@ let sheet: GoogleSpreadsheetWorksheet
     googleDriveAuthed = true;
 })
 
-export async function addHours(name, hours, activity) {
-    if (!googleDriveAuthed) return;
-    await sheet.loadCells()
-    const currentTime = Date.now() / 1000
-    // Add to sheet
-    try {
-        await sheet.loadCells()
-        await sheet.addRow([currentTime, currentTime, name, hours.toFixed(2), activity])
-        await sheet.saveUpdatedCells()
-    } catch (e) {
-        console.error(`Could not add time for ${name}`)
-        console.error(e)
+export async function addHours(name, hours, activity){
+    // Use CLUCK API calls to keep the logic in one place and avoid concurrent access issues
+    const response = await fetch(cluck_baseurl + "/api/log", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            name:name,
+            hours:hours,
+            activity:activity
+        })
+    })
+
+    if (!response.ok) {
+        throw new Error(`Could not add ${hours} hours for ${name}. ${response.statusText}`)
     }
 }
 

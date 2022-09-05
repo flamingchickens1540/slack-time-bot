@@ -3,33 +3,30 @@ import { slack_client } from '..';
 import { json_data_path } from '../consts';
 import { TimeRequest, UserSettings } from '../types';
 
-export let data:Data
+export let data:Data = {
+    timeRequests: {},
+    userSettings: {},
+    slackApproverIDs: []
+}
 type Data = {
     timeRequests: { [key: string]: TimeRequest }
     userSettings: { [key: string]: UserSettings }
     slackApproverIDs: string[]
 }
 export async function saveData() {
-    writeFile(json_data_path, JSON.stringify(data), (err) => { console.log(err) })
+    writeFile(json_data_path, JSON.stringify(data), (err) => { if (err != null) console.log(err) })
 }
 
 export function loadData() {
     if (existsSync(json_data_path)) {
         try {
             data = JSON.parse(readFileSync(json_data_path, 'utf-8'))
-        } catch (err) { initData() }
+        } catch (err) { console.warn(err) }
     } else {
-        initData()
+        saveData()
     }
 }
-function initData() {
-    data = {
-        timeRequests: {},
-        userSettings: {},
-        slackApproverIDs: []
-    }
-    saveData()
-}
+
 
 export function getSettings(user_id):UserSettings {
     ensureSettingsExist(user_id)

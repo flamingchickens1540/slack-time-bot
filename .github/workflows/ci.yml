@@ -50,10 +50,12 @@ jobs:
         run: npm ci
         env:
           CI: TRUE
-      - name: Rename example secrets
+      - name: Rename secret files
         run: |
-          mv secrets/consts.example.js secrets/consts.js
-          mv secrets/slack_secrets.example.js secrets/slack_secrets.js
+          for i in secrets/*.example.*
+          do
+            mv "$i" "`echo $i | sed 's/.example//'`"
+          done
       - name: Build
         run: npm run build
   
