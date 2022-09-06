@@ -6,14 +6,15 @@ import log_modal from "../views/log";
 
 
 function parseTimeArg(arg: string, hours: number, actIndex: number): [number, number] {
-    if (!isNaN(parseInt(arg.slice(0, arg.length - 1))) && arg.length != 1) {
+    if (!isNaN(parseFloat(arg.slice(0, arg.length - 1))) && arg.length != 1) {
         const val = parseFloat(arg)
         if (arg.slice(-1) === 'h') {
             hours += val;
+            actIndex += 1;
         } else if (arg.slice(-1) === 'm') {
             hours += val / 60;
+            actIndex += 1;
         }
-        actIndex += 1;
     }
     return [hours, actIndex]
 }
@@ -21,7 +22,7 @@ function parseTimeArg(arg: string, hours: number, actIndex: number): [number, nu
 export async function handleLogCommand({ command, logger, ack, respond, client }: SlackCommandMiddlewareArgs & AllMiddlewareArgs) {
     await ack()
 
-    let hours = 0, actStart = 0;
+    let hours = 0, actStart = 1;
     const args = command.text.split(" ")
     if (args.length === 0 || args[0] === '') {
         await client.views.open({
@@ -31,7 +32,7 @@ export async function handleLogCommand({ command, logger, ack, respond, client }
     } else if (args.length === 1) {
         await respond({ response_type: 'ephemeral', text: noActivitySpecified })
     } else {
-        [hours, actStart] = parseTimeArg(args[0], hours, actStart);
+        [hours,_] = parseTimeArg(args[0], hours, actStart);
         [hours, actStart] = parseTimeArg(args[1], hours, actStart);
 
         const activity = args.slice(actStart, args.length).join(' ');
