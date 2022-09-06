@@ -42,7 +42,7 @@ export async function handleLogCommand({ command, logger, ack, respond, client }
         }
         const msg_txt = getSubmittedDm({ hours: hours, activity: activity });
         try {
-            if (hours <= 0) {
+            if (Math.round(hours*60)/60 <= 0) { // test if total minutes rounds to zero
                 await respond({ response_type: 'ephemeral', text: tooFewHours })
             } else {
                 await client.chat.postMessage({ channel: command.user_id, text: msg_txt })
