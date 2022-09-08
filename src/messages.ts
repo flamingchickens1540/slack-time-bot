@@ -34,6 +34,9 @@ export const getAllPendingRequestBlocks = async (slack_client: WebClient) => {
     ]
     await Promise.all(Object.values(data.timeRequests).map(async (person) => {
         data.slackApproverIDs.forEach(async (approver_id) => {
+            if (person.requestMessages[approver_id] == null) {
+                return
+            }
             const permalink = await slack_client.chat.getPermalink({ channel: person.requestMessages[approver_id].channel, message_ts: person.requestMessages[approver_id].ts })
             output.push({
                 "type": "section",
