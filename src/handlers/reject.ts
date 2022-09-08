@@ -58,7 +58,7 @@ export async function handleRejectModal({ ack, body, view, client, logger }: Sla
         })
     } catch (err) { logger.error("Failed to handle reject modal:\n" + err) }
 
-    delete globalThis.timeRequests[request_id]
+    delete data.timeRequests[request_id]
     saveData()
 }
 
