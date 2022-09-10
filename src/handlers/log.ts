@@ -1,7 +1,7 @@
 import type { AllMiddlewareArgs, SlackCommandMiddlewareArgs, SlackShortcutMiddlewareArgs, SlackViewMiddlewareArgs, ViewSubmitAction } from "@slack/bolt";
 import type { WebClient } from "@slack/web-api";
 import { handleHoursRequest } from "..";
-import { formatDuration, noActivitySpecified, sanitizeCodeblock, tooFewHours } from "../messages";
+import { formatDuration, noActivitySpecified, sanitizeCodeblock, submissionLogged, tooFewHours } from "../messages";
 import log_modal from "../views/log";
 
 
@@ -32,7 +32,7 @@ export async function handleLogCommand({ command, logger, ack, respond, client }
     } else if (args.length === 1) {
         await respond({ response_type: 'ephemeral', text: noActivitySpecified })
     } else {
-        [hours,_] = parseTimeArg(args[0], hours, actStart);
+        hours = parseTimeArg(args[0], hours, actStart)[0];
         [hours, actStart] = parseTimeArg(args[1], hours, actStart);
 
         const activity = args.slice(actStart, args.length).join(' ');
@@ -45,6 +45,7 @@ export async function handleLogCommand({ command, logger, ack, respond, client }
             if (Math.round(hours*60)/60 <= 0) { // test if total minutes rounds to zero
                 await respond({ response_type: 'ephemeral', text: tooFewHours })
             } else {
+                await respond({ response_type: 'ephemeral', text: submissionLogged })
                 await client.chat.postMessage({ channel: command.user_id, text: msg_txt })
                 handleHoursRequest(command.user_id, hours, activity)
             }

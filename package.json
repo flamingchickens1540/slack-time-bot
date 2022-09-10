@@ -7,7 +7,7 @@
 	"scripts": {
 		"start": "node ./dist/index.cjs",
 		"start:dev": "npm run build && node --enable-source-maps ./dist/index.cjs",
-		"build": "esbuild src/index.ts --bundle --outfile=./dist/index.cjs --platform=node --minify --sourcemap",
+		"build": "esbuild src/index.ts --bundle --outfile=./dist/index.cjs --platform=node --sourcemap",
 		"lint": "eslint --ext .ts src",
 		"lint:report": "eslint --ext .ts --output-file eslint_report.json --format json src"
 	},

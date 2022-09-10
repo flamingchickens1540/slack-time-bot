@@ -8,10 +8,9 @@ export const getSubmittedAltText = (name: string, hours: number, activity: strin
     return `${name} submitted ${formatDuration(hours)} for ${activity}`
 }
 
-/**
- * Message for when a time request for 0 hours is submitted
- */
+
 export const tooFewHours = ":warning: I just blocked your submission of ZERO hours. Please submit hours in the form: `/log 2h 15m write error messaging for the slack time bot #METAAAAA!!!` :warning: (Make note of spaces/lack of spaces)"
+export const submissionLogged = "Your submission has been logged"
 export const noActivitySpecified = ":warning: I just blocked your submission with no activity. Please submit hours in the form: `/log 2h 15m write error messaging for the slack time bot #METAAAAA!!!` :warning: (Make note of spaces/lack of spaces)"
 
 

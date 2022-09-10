@@ -74,11 +74,18 @@ export async function handleHoursRequest(uid: string, hrs: number, activity: str
     const blocks = getRequestBlocks(uid, hrs, activity, request_id)
 
     await Promise.all(data.slackApproverIDs.map(async (approver_id) => {
-        const message = await slack_app.client.chat.postMessage({ channel: approver_id, text: getSubmittedAltText(name, hrs, activity), blocks: blocks })
-        data.timeRequests[request_id].requestMessages[approver_id] = {
-            channel: message.channel!,
-            ts: message.ts!
+        try {
+            const message = await slack_app.client.chat.postMessage({ channel: approver_id, text: getSubmittedAltText(name, hrs, activity), blocks: blocks })
+            data.timeRequests[request_id].requestMessages[approver_id] = {
+                channel: message.channel!,
+                ts: message.ts!
+            }
+        } catch (e) {
+            console.error(e)
         }
     }))
+    if (Object.values(data.timeRequests[request_id].requestMessages).length == 0) {
+        await slack_app.client.chat.postMessage({ channel: uid, text: "Your request could not be submitted, please contact your local application software manager for help" })
+    }
     saveData()
 }
