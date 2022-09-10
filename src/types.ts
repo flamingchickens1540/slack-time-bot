@@ -4,7 +4,7 @@ export type ButtonActionMiddlewareArgs = SlackActionMiddlewareArgs<BlockAction<B
 export type StaticSelectActionMiddlewareArgs = SlackActionMiddlewareArgs<BlockAction<StaticSelectAction>>;
 
 export type LeaderboardType = "total" | "weekly" | "lab" | "external" | "department"
-export type Department = "fab" | "controls" | "robotsw" | "community" | "companal" | "outreach"
+export type Department = "fab" | "controls" | "robotsw" | "appsw" | "community" | "companal" | "outreach"
 export type TimeRequest = {
     name: string;
     time: number;

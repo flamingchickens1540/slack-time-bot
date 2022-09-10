@@ -110,6 +110,7 @@ export const departmentTitles: { [key in Department]: string } = {
     fab: "Fabrication",
     controls: "Controls",
     robotsw: "Robot Software",
+    appsw: "App Software",
     community: "Community Engineering",
     companal: "Competetive Analysis",
     outreach: "Outreach"
@@ -139,6 +140,14 @@ const departmentOptions: { [key in Department]: PlainTextOption } = {
             emoji: true
         },
         value: "robotsw"
+    },
+    appsw: {
+        text: {
+            type: "plain_text",
+            text: departmentTitles.appsw,
+            emoji: true
+        },
+        value: "appsw"
     },
     community: {
         text: {
