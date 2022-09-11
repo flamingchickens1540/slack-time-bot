@@ -16,15 +16,23 @@ export async function handleGraphCommand({ command, ack, respond, client }: Slac
     } else {
         // Collect all user names from mentions
         await Promise.all(args.map(async arg => {
-            // strip mention characters from user id
-            const user_id = arg.match(/<@([\w\d]+)\|.+>/)![1]
-            const user = await client.users.info({ user: user_id })
-            if (user.ok && typeof (user.user!.real_name) !== 'undefined') {
-                users.push(user.user!.real_name)
+            
+            try {
+                // strip mention characters from user id
+                const user_id = arg.match(/<@([\w\d]+)\|.+>/)![1]
+                const user = await client.users.info({ user: user_id })
+                if (user.ok && typeof (user.user!.real_name) !== 'undefined') {
+                    users.push(user.user!.real_name)
+                }
+            } catch (e) {
+                await respond({ response_type: 'ephemeral', text: `Could not find user ${arg}` })
             }
         }))
     }
-
+    if (users.length == 0) {
+        await respond({ replace_original: true, response_type: 'ephemeral', text: 'No users specified' })
+        return
+    }
     const image_url = await createChart(users)
     await respond({ text: "Hours graph", blocks: getGraphBlocks(image_url, command.user_id, users), response_type: 'in_channel' })
 }
