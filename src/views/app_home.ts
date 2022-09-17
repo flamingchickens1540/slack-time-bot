@@ -201,7 +201,7 @@ function getDepartmentHours(hours:LogRow[]):LeaderboardEntry[] {
         departments[settings.department].members[row.name] = true
     })
     return Object.entries(departments).map(([name, data]) => {
-        return { name: departmentTitles[name], hours: data.hours/Object.values(data.members).length }
+        return { name: departmentTitles[name], hours: data.hours }
     })
 }
 
