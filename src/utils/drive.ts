@@ -39,6 +39,21 @@ export async function addHours(name, hours, activity){
     }
 }
 
+
+export async function voidHours(name:string):Promise<number>{
+    const response = await fetch(cluck_baseurl + "/api/void", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            name:name,
+            api_key:cluck_api_key
+        })
+    })
+    return response.status
+}
+
 export async function getHours(): Promise<LogRow[]> {
     if (!googleDriveAuthed) return [];
     await sheet.loadCells()

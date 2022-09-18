@@ -3,6 +3,7 @@ import { handleAcceptButton } from "./accept";
 import { handleLeaderboardAction, handleAppHomeOpened } from "./app_home";
 import { handleGraphCommand } from "./graph";
 import { handleLogCommand, handleLogModal, handleLogShortcut } from "./log";
+import { handleLogoutCommand } from "./logout";
 import { handleRejectButton, handleRejectModal } from "./reject";
 import { handleOpenSettingsModal, handleSettingsSave } from "./settings";
 
@@ -10,6 +11,7 @@ export function register_listeners(app:App) {
 	// Commands and Shortcuts
 	app.command('/log', handleLogCommand)
 	app.command('/graph', handleGraphCommand)
+	app.command('/clearlogin', handleLogoutCommand)
 	app.shortcut('log_hours', handleLogShortcut)
 
 	// Buttons
