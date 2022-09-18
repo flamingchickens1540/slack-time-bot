@@ -3,7 +3,7 @@ import { formatNames } from "../messages";
 import { createChart } from "../utils/chart";
 
 
-export async function handleGraphCommand({ command, ack, respond, client }: SlackCommandMiddlewareArgs & AllMiddlewareArgs) {
+export async function handleGraphCommand({ command, logger, ack, respond, client }: SlackCommandMiddlewareArgs & AllMiddlewareArgs) {
     await ack({ response_type: 'ephemeral', text: 'Generating...' })
 
     const args = command.text.split(" ").filter(x => x.trim() != '')
@@ -25,6 +25,7 @@ export async function handleGraphCommand({ command, ack, respond, client }: Slac
                     users.push(user.user!.real_name)
                 }
             } catch (e) {
+                logger.warn(`Could not find user ${arg}`, e)
                 await respond({ response_type: 'ephemeral', text: `Could not find user ${arg}` })
             }
         }))
