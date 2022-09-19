@@ -14,7 +14,7 @@ type Data = {
     slackApproverIDs: string[]
 }
 export async function saveData() {
-    writeFile(json_data_path, JSON.stringify(data), (err) => { if (err != null) console.log(err) })
+    writeFile(json_data_path, JSON.stringify(data, null, 4), (err) => { if (err != null) console.log(err) })
 }
 
 export function loadData() {
