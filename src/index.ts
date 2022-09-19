@@ -4,7 +4,7 @@ import * as uuid from "uuid";
 import { app_token, signing_secret, token } from '../secrets/slack_secrets';
 import { register_listeners } from "./handlers/index";
 import { getAllPendingRequestBlocks, getSubmittedAltText } from "./messages";
-import { ensureSettingsExist, loadData, saveData, data } from "./utils/data";
+import {  loadData, saveData, data } from "./utils/data";
 import { getRequestBlocks } from "./views/new_request";
 
 // Initialize global data
@@ -28,16 +28,7 @@ register_listeners(slack_app)
 
 slack_app.start().then(async () => {
     console.log("Bot started")
-
-    const users = await slack_client.users.list()
-    users.members?.forEach(async (member) => {
-        if (!member.is_bot && !member.deleted) {
-            await ensureSettingsExist(member.id)
-        }
-    })
 })
-
-
 // Schedule Tasks
 
 const sendPendingPing = async () => {

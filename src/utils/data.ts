@@ -2,7 +2,6 @@ import { existsSync, readFileSync, writeFile } from 'fs';
 import { slack_client } from '..';
 import { json_data_path } from '../consts';
 import { TimeRequest, UserSettings } from '../types';
-
 export let data:Data = {
     timeRequests: {},
     userSettings: {},
@@ -27,7 +26,6 @@ export function loadData() {
     }
 }
 
-
 export function getSettings(user_id):UserSettings {
     ensureSettingsExist(user_id)
     return data.userSettings[user_id]
@@ -40,5 +38,8 @@ export async function ensureSettingsExist(user_id) {
             leaderboard_type: "department",
             real_name: user.user!.real_name!
         }
+    } else {
+        const user = await slack_client.users.info({ user: user_id })
+        data.userSettings[user_id].real_name = user.user!.real_name!
     }
 }

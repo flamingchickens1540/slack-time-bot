@@ -29,5 +29,5 @@ export type LogRow = {
 export type UserSettings = {
     leaderboard_type: LeaderboardType,
     department?: Department,
-    readonly real_name: string,
+    real_name: string,
 }
