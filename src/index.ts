@@ -31,7 +31,7 @@ slack_app.start().then(async () => {
 
     const users = await slack_client.users.list()
     users.members?.forEach(async (member) => {
-        if (!member.is_bot) {
+        if (!member.is_bot && !member.deleted) {
             await ensureSettingsExist(member.id)
         }
     })
