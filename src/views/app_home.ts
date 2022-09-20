@@ -108,7 +108,8 @@ const getLeaderboardViewBlocks = (leaderboard_entries: { name: string, hours: nu
                     emoji: true
                 },
                 initial_option: metrics[currentMetric],
-                options: Object.values(metrics),
+                // options: Object.values(metrics),
+                options: [metrics.department],
                 action_id: "selected_metric"
             }
         },

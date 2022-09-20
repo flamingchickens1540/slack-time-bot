@@ -41,5 +41,6 @@ export async function ensureSettingsExist(user_id) {
     } else {
         const user = await slack_client.users.info({ user: user_id })
         data.userSettings[user_id].real_name = user.user!.real_name!
+        data.userSettings[user_id].leaderboard_type = "department"
     }
 }
