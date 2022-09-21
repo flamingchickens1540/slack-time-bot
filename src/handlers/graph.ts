@@ -12,7 +12,8 @@ export async function handleGraphCommand({ command, logger, ack, respond, client
         const user = await client.users.info({ user: command.user_id })
         users = [user.user!.real_name!]
     } else if (args[0] == 'all') {
-        users = args
+        await respond({ text: "Hours graph", blocks: getGraphBlocks("https://docs.google.com/spreadsheets/d/e/2PACX-1vSHrWf9EtoNjuaGFuBy0IsnMQ5zDS1YLWCDwwyb0df0bjAf-13Nqt3z8bt7b3YA1_NhfHn6J2TjyLyl/pubchart?oid=1533918925&format=image", command.user_id, ["all"]), response_type: 'in_channel' })
+        return;
     } else {
         // Collect all user names from mentions
         await Promise.all(args.map(async arg => {
