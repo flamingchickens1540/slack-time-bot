@@ -31,3 +31,14 @@ export type UserSettings = {
     department?: Department,
     real_name: string,
 }
+export type Member = {
+    name: string;
+    firstname: string;
+    img: string;
+    certs:Certification[];
+}
+
+export type Certification = {
+    id: string;
+    name: string;
+}

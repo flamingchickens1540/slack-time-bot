@@ -1,5 +1,6 @@
 // TODO: Update to real sheet and approver ID
-export const json_data_path = 'data.json'
+export const json_data_path = 'data/data.json'
+export const certs_cache_data_path = 'data/certs.json'
 export const log_sheet_name = "Log"
 
 const max_bar_length = 9

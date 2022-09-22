@@ -3,4 +3,5 @@
 !/secrets/*.example.*
 
 data.json
+data
 dist

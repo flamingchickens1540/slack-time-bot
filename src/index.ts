@@ -4,6 +4,7 @@ import * as uuid from "uuid";
 import { app_token, signing_secret, token } from '../secrets/slack_secrets';
 import { register_listeners } from "./handlers/index";
 import { getAllPendingRequestBlocks, getSubmittedAltText } from "./messages";
+import { celebrateMembers } from "./tasks/certs";
 import {  loadData, saveData, data } from "./utils/data";
 import { getRequestBlocks } from "./views/new_request";
 
@@ -44,6 +45,8 @@ const sendPendingPing = async () => {
 }
 // Send list of pending requests at 9:30am on weekdays
 new CronJob('30 9 * * 1-5', sendPendingPing, null, true, 'America/Los_Angeles').start()
+new CronJob('*/5 * * * *', () => celebrateMembers(slack_app.client), null, true, 'America/Los_Angeles').start()
+celebrateMembers(slack_app.client)
 console.log("Cron Job Scheduled!")
 
 

@@ -39,6 +39,10 @@ export async function addHours(name, hours, activity){
     }
 }
 
+export async function getMembers() {
+    return await (await fetch(cluck_baseurl+"/api/members")).json()
+}
+
 
 export async function voidHours(name:string):Promise<number>{
     const response = await fetch(cluck_baseurl + "/api/void", {
