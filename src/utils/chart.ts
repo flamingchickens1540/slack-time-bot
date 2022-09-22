@@ -1,15 +1,18 @@
 import { getHours } from "./drive";
 import { shorten } from 'tinyurl'
 import { formatNames } from "../messages";
+import { LogRow } from "../types";
 
 async function getChartData(names: string[]) {
     const data = await getHours()
-    let filtered
+    let filtered:LogRow[]
     if (names[0] == 'all') {
         filtered = data
     } else {
         filtered = data.filter(x => names.includes(x.name))
+        
     }
+    filtered.sort((a, b) => { return a.time_in.getTime() - b.time_in.getTime()})
     const hours = filtered.map(x => x.hours)
     const cumulative_hours = hours.map((_, index) => {
         let sum = 0
@@ -22,6 +25,7 @@ async function getChartData(names: string[]) {
             y: cumulative_hours[index].toFixed(1)
         }
     })
+    
     const namestring = formatNames(names)
     return getTimeChartSpecs(namestring, chartData)
 }
