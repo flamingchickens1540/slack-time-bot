@@ -1,7 +1,7 @@
 import type { InputBlock, KnownBlock, ModalView, PlainTextOption, StaticSelect } from "@slack/bolt";
 import type { Department } from "../types";
 import { slack_admin_id } from "../../secrets/consts";
-import { getSettings, data } from "../utils/data";
+import { data } from "../utils/data";
 
 
 export const settingsButton: KnownBlock = {
@@ -79,7 +79,7 @@ export const getSettingsBlocksApprovers = (): KnownBlock[] => {
 };
 
 export const getSettingsBlocksDepartment = (user_id: string): KnownBlock[] => {
-    const settings = getSettings(user_id)
+    const settings = data.userSettings[user_id] ?? {}
     const output: InputBlock = {
         type: "input",
         label: {

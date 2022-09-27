@@ -33,21 +33,34 @@ export function loadData() {
     saveData()
 }
 
-export function getSettings(user_id):UserSettings {
-    ensureSettingsExist(user_id)
+export async function getSettings(user_id):Promise<UserSettings> {
+    await ensureSettingsExist(user_id)
     return data.userSettings[user_id]
 }
 
 export async function ensureSettingsExist(user_id) {
-    if (typeof (data.userSettings[user_id]) === 'undefined') {
+
+    if (data.userSettings[user_id] == null) {
         const user = await slack_client.users.info({ user: user_id })
         data.userSettings[user_id] = {
+            real_name: user.user!.real_name!,
             leaderboard_type: "department",
-            real_name: user.user!.real_name!
         }
     } else {
-        const user = await slack_client.users.info({ user: user_id })
-        data.userSettings[user_id].real_name = user.user!.real_name!
-        data.userSettings[user_id].leaderboard_type = "department"
+        const settings = data.userSettings[user_id]
+        data.userSettings[user_id] = {
+            leaderboard_type: settings.leaderboard_type ?? "department",
+            real_name: settings.real_name,
+            department: settings.department
+        }
     }
+    
+    saveData()
+}
+
+
+export async function updateUsernames() {
+    await Promise.all(Object.keys(data.userSettings).map(async (key) => {
+        data.userSettings[key].real_name = await (await slack_client.users.info({ user: key })).user?.real_name ?? "John Doe"
+    }))
 }

@@ -10,20 +10,20 @@ type LeaderboardFilter = (value: LogRow, index: number, array: LogRow[]) => bool
 
 export async function getLeaderboardView(user: string): Promise<KnownBlock[]> {
 
-    const settings = getSettings(user)
+    
     
     // Get the leaderboard
     const hours = await getHours()
-    
-    let leaderboard_candidates:LeaderboardEntry[]
-    switch (settings.leaderboard_type) {
-        case "department":
-            leaderboard_candidates = getDepartmentHours(hours)
-            break;
-        default:
-            leaderboard_candidates = getCandidatesFromFilter(hours, leaderboardFilters[settings.leaderboard_type])
-            break;
-    }
+    const settings = await getSettings(user)
+    const leaderboard_candidates:LeaderboardEntry[] = await getDepartmentHours(hours)
+    // switch (settings.leaderboard_type) {
+    //     case "department":
+    //         leaderboard_candidates = getDepartmentHours(hours)
+    //         break;
+    //     default:
+    //         leaderboard_candidates = getCandidatesFromFilter(hours, leaderboardFilters[settings.leaderboard_type])
+    //         break;
+    // }
     
     
     // Sort the people by hours, reversed
@@ -174,15 +174,15 @@ function getCandidatesFromFilter(hours:LogRow[], filter:LeaderboardFilter):Leade
     return Object.values(people)
 }
 
-function getDepartmentHours(hours:LogRow[]):LeaderboardEntry[] {
+async function getDepartmentHours(hours:LogRow[]):Promise<LeaderboardEntry[]> {
     const departments: { [key: string]:{members:{[key:string]:boolean}, hours:number} } = {}
     const userCache:{[key:string]:string}= {}
-    hours.forEach(row => {
+    await Promise.all(hours.map(async row => {
         let user_id:string
         let settings:UserSettings
         if (row.name in userCache) {
             user_id = userCache[row.name]
-            settings = getSettings(user_id)
+            settings = await getSettings(user_id)
         } else {
             // Find the user's settings
             const results = Object.entries(data.userSettings).find(([, value]) => value.real_name == row.name)
@@ -200,7 +200,7 @@ function getDepartmentHours(hours:LogRow[]):LeaderboardEntry[] {
         }
         departments[settings.department].hours += row.hours
         departments[settings.department].members[row.name] = true
-    })
+    }))
     return Object.entries(departments).map(([name, data]) => {
         return { name: departmentTitles[name], hours: data.hours }
     })

@@ -34,7 +34,7 @@ export async function handleLeaderboardAction({ ack, client, body, action }: Sta
     await ack()
     const selected_metric = action.selected_option.value
 
-    ensureSettingsExist(body.user.id)
+    await ensureSettingsExist(body.user.id)
     data.userSettings[body.user.id].leaderboard_type = selected_metric as LeaderboardType
     
     publishDefaultHomeView(body.user.id, client)
