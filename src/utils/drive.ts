@@ -1,6 +1,6 @@
 import { GoogleSpreadsheet } from "google-spreadsheet";
 import type GoogleSpreadsheetWorksheet from 'google-spreadsheet/lib/GoogleSpreadsheetWorksheet';
-import { cluck_baseurl, hours_sheet_id, cluck_api_key } from '../../secrets/consts';
+import { cluck_baseurl, hours_sheet_id, cluck_api_key, cluck_api_id } from '../../secrets/consts';
 import { log_sheet_name } from "../consts";
 import google_client_secret from '../../secrets/client_secret.json';
 import type { LogRow } from '../types';
@@ -8,6 +8,8 @@ import fetch from 'node-fetch';
 
 let googleDriveAuthed = false;
 let sheet: GoogleSpreadsheetWorksheet
+
+const cluck_api_token = Buffer.from(cluck_api_id).toString("base64")+":"+Buffer.from(cluck_api_key).toString("base64");
 
 // Initialize Google Drive client
 (async () => {
@@ -18,6 +20,8 @@ let sheet: GoogleSpreadsheetWorksheet
 })().then(async () => {
     googleDriveAuthed = true;
 })
+
+
 
 export async function addHours(name, hours, activity){
     // Use CLUCK API calls to keep the logic in one place and avoid concurrent access issues
@@ -30,7 +34,7 @@ export async function addHours(name, hours, activity){
             name:name,
             hours:hours,
             activity:activity,
-            api_key:cluck_api_key
+            api_key:cluck_api_token
         })
     })
 
@@ -52,7 +56,7 @@ export async function voidHours(name:string):Promise<number>{
         },
         body: JSON.stringify({
             name:name,
-            api_key:cluck_api_key
+            api_key:cluck_api_token
         })
     })
     return response.status

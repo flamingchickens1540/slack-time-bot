@@ -7,4 +7,5 @@ export const slack_celebration_channel = "CSLACKCHANNEL"
 // The API endpoint of a CLUCK server
 export const cluck_baseurl = 'http://localhost:4000'
 // The Souper Secret CLUCK Api Key
-export const cluck_api_key = 'broccoli'
+export const cluck_api_id = 'supertestingkey'
+export const cluck_api_key = 'cabbage'
