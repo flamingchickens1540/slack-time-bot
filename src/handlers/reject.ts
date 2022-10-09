@@ -2,7 +2,7 @@ import type { AllMiddlewareArgs, KnownBlock, SlackViewMiddlewareArgs, ViewSubmit
 import type { ButtonActionMiddlewareArgs } from "../types";
 import { formatDuration, sanitizeCodeblock } from "../messages";
 import { saveData, data } from "../utils/data";
-import { getRejectMessageModal } from "../views/reject";
+import { getRespondMessageModal } from "../views/respond";
 
 
 
@@ -13,10 +13,9 @@ export async function handleRejectButton({ ack, body, action, client, logger }: 
     try {
         client.views.open({
             trigger_id: body.trigger_id,
-            view: getRejectMessageModal(requestInfo.name, requestInfo.time, requestInfo.activity, action.value)
+            view: getRespondMessageModal("Reject", requestInfo.name, requestInfo.time, requestInfo.activity, action.value)
         })
     } catch (err) { logger.error("Failed to handle reject button:\n" + err) }
-
 }
 
 

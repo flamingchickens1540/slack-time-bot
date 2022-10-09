@@ -1,19 +1,20 @@
 import type { ModalView } from "@slack/bolt";
 import { formatDuration, sanitizeCodeblock } from "../messages";
 
-export function getRejectMessageModal(name:string, hours:number, activity:string, request_id:string): ModalView {
+export function getRespondMessageModal(type: "Accept"|"Reject", name:string, hours:number, activity:string, request_id:string): ModalView {
+    const callback_id = `${type.toLowerCase()}_modal`
     return {
         type: "modal",
         private_metadata: request_id,
-        callback_id: "reject_message",
+        callback_id: callback_id,
         title: {
             type: "plain_text",
-            text: "Reject Time Request",
+            text: type+"Time Request",
             emoji: true
         },
         submit: {
             type: "plain_text",
-            text: "Reject and Send",
+            text: type+" and Send",
             emoji: true
         },
         close: {
@@ -42,7 +43,7 @@ export function getRejectMessageModal(name:string, hours:number, activity:string
                 },
                 label: {
                     type: "plain_text",
-                    text: "Reject and Send Message",
+                    text: type+" and Send Message",
                     emoji: true
                 }
             }

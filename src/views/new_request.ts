@@ -37,6 +37,17 @@ export function getRequestBlocks(uid: string, hrs: number, activity: string, req
                     text: {
                         type: "plain_text",
                         emoji: true,
+                        text: "Accept w/ Message"
+                    },
+                    style: "primary",
+                    action_id: "accept_msg",
+                    value: request_id
+                },
+                {
+                    type: "button",
+                    text: {
+                        type: "plain_text",
+                        emoji: true,
                         text: "Reject w/ Message"
                     },
                     style: "danger",

@@ -1,5 +1,5 @@
 import type { App } from "@slack/bolt";
-import { handleAcceptButton } from "./accept";
+import { handleAcceptButton, handleAcceptMessageButton, handleAcceptModal } from "./accept";
 import { handleLeaderboardAction, handleAppHomeOpened } from "./app_home";
 import { handleGraphCommand } from "./graph";
 import { handleLogCommand, handleLogModal, handleLogShortcut } from "./log";
@@ -15,7 +15,8 @@ export function register_listeners(app:App) {
 	app.shortcut('log_hours', handleLogShortcut)
 
 	// Buttons
-	app.action("accept", handleAcceptButton)
+	app.action("accept",     handleAcceptButton)
+	app.action("accept_msg", handleAcceptMessageButton)
 	app.action("reject", handleRejectButton)
 	app.action("open_settings_modal", handleOpenSettingsModal)
 	app.action("jump_url", async ({ ack }) => { await ack() })
@@ -24,7 +25,8 @@ export function register_listeners(app:App) {
 	app.action("selected_metric", handleLeaderboardAction)
 	
 	// Modals
-	app.view("reject_message", handleRejectModal)
+	app.view("reject_modal", handleRejectModal)
+	app.view("accept_modal", handleAcceptModal)
 	app.view("time_submission", handleLogModal)
 	app.view("save_settings", handleSettingsSave)
 

@@ -25,6 +25,8 @@ export async function celebrateMembers(client: WebClient) {
                 newCerts.push(cert)
             }
         })
+        certs[member.name] = member.certs
+        await saveData()
         if (newCerts.length > 0) {
             const user = slackMembers?.find((slack_member) => slack_member.real_name == member.name)
             const userText = (user == null) ? member.name : `<@${user.id}>`;
@@ -36,9 +38,9 @@ export async function celebrateMembers(client: WebClient) {
                 await client.chat.postMessage({ channel: slack_celebration_channel, text: message })
             })
         }
-        certs[member.name] = member.certs
-        await saveData()
+        
     })
+    
     await Promise.all(promises)
     
 }
