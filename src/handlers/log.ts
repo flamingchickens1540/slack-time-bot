@@ -42,7 +42,7 @@ export async function handleLogCommand({ command, logger, ack, respond, client }
         }
         const msg_txt = getSubmittedDm({ hours: hours, activity: activity });
         try {
-            if (Math.round(hours*60)/60 <= 0) { // test if total minutes rounds to zero
+            if (Math.round(hours*60)/60 == 0) { // test if total minutes rounds to zero
                 await respond({ response_type: 'ephemeral', text: tooFewHours })
             } else {
                 await respond({ response_type: 'ephemeral', text: submissionLogged })
@@ -73,7 +73,7 @@ export async function handleLogModal({ ack, body, view, client, logger }: SlackV
     // Ensure the time values are valid
     hours = isNaN(hours) ? 0 : hours;
 
-    if (Math.round(hours*60)/60 > 0) {
+    if (Math.round(hours*60)/60 != 0) {
         const message = getSubmittedDm({ hours: hours, activity: activity });
         try {
             await client.chat.postMessage({ channel: body.user.id, text: message })
