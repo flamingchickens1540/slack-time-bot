@@ -3,12 +3,16 @@ import type GoogleSpreadsheetWorksheet from 'google-spreadsheet/lib/GoogleSpread
 import { cluck_baseurl, hours_sheet_id, cluck_api_key, cluck_api_id } from '../../secrets/consts';
 import { log_sheet_name } from "../consts";
 import google_client_secret from '../../secrets/client_secret.json';
-import type { LogRow, Member } from '../types';
+import type { LogRow, Member as ApiMember } from '../types';
 import fetch from 'node-fetch';
+
+import { Member } from "@slack/web-api/dist/response/UsersListResponse";
+import { WebClient } from "@slack/web-api";
+import { slack_client } from "..";
 
 let googleDriveAuthed = false;
 let sheet: GoogleSpreadsheetWorksheet
-
+let slackMembers:Member[] = [];
 const cluck_api_token = Buffer.from(cluck_api_id).toString("base64")+":"+Buffer.from(cluck_api_key).toString("base64");
 
 // Initialize Google Drive client
@@ -43,10 +47,20 @@ export async function addHours(name, hours, activity){
     }
 }
 
-export async function getMembers():Promise<Member[]> {
-    return await (await fetch(cluck_baseurl+"/api/members")).json() as Member[]
+export async function getMembers():Promise<ApiMember[]> {
+    return await (await fetch(cluck_baseurl+"/api/members")).json() as ApiMember[]
 }
 
+export async function updateSlackMembers(client:WebClient):Promise<void> {
+    slackMembers = (await client.users.list()).members!
+}
+
+export async function getSlackMembers():Promise<Member[]> {
+    if (slackMembers.length == 0) {
+        await updateSlackMembers(slack_client)
+    }
+    return slackMembers 
+}
 
 export async function voidHours(name:string):Promise<number>{
     const response = await fetch(cluck_baseurl + "/api/void", {

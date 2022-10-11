@@ -2,7 +2,7 @@ import type { WebClient } from "@slack/web-api";
 import { slack_celebration_channel } from "../../secrets/consts";
 import { Certification, Member } from "../types";
 import { certs, saveData } from "../utils/data";
-import { getMembers } from "../utils/drive";
+import { getMembers, getSlackMembers } from "../utils/drive";
 
 const congratsMessages = [
     "Hey! Congrats @ for you new {} Cert!",
@@ -15,7 +15,7 @@ const congratsMessages = [
     ]
 
 export async function celebrateMembers(client: WebClient) {
-    const slackMembers = (await client.users.list()).members
+    const slackMembers = await getSlackMembers();
     const members = await getMembers() as Member[]
     const promises = members.map(async (member) => {
         const cachedCerts = (certs[member.name] ?? []).map((cert) => cert.id)
