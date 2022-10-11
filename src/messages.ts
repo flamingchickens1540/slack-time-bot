@@ -64,7 +64,7 @@ export function sanitizeCodeblock(activity: string): string {
 export function formatDuration(hrs: number, mins?: number): string {
 	if (typeof (mins) === 'undefined') {
 		const mins_cached = hrs * 60
-		hrs = Math.floor(mins_cached / 60);
+		hrs = Math.floor(Math.abs(mins_cached) / 60) * Math.sign(mins_cached);
 		mins = Math.round(mins_cached % 60);
 	}
 	const hours = hrs === 1 ? '1 hour' : `${hrs} hours`
