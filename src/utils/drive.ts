@@ -3,7 +3,7 @@ import type GoogleSpreadsheetWorksheet from 'google-spreadsheet/lib/GoogleSpread
 import { cluck_baseurl, hours_sheet_id, cluck_api_key, cluck_api_id } from '../../secrets/consts';
 import { log_sheet_name } from "../consts";
 import google_client_secret from '../../secrets/client_secret.json';
-import type { LogRow } from '../types';
+import type { LogRow, Member } from '../types';
 import fetch from 'node-fetch';
 
 let googleDriveAuthed = false;
@@ -43,8 +43,8 @@ export async function addHours(name, hours, activity){
     }
 }
 
-export async function getMembers() {
-    return await (await fetch(cluck_baseurl+"/api/members")).json()
+export async function getMembers():Promise<Member[]> {
+    return await (await fetch(cluck_baseurl+"/api/members")).json() as Member[]
 }
 
 

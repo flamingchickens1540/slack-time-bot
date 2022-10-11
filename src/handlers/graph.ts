@@ -1,9 +1,10 @@
 import type { AllMiddlewareArgs, SlackCommandMiddlewareArgs, KnownBlock } from "@slack/bolt";
 import { formatNames } from "../messages";
 import { createChart } from "../utils/chart";
+import { getMembers } from "../utils/drive";
 
 
-export async function handleGraphCommand({ command, logger, ack, respond, client }: SlackCommandMiddlewareArgs & AllMiddlewareArgs) {
+export async function handleGraphCommand({ command, ack, respond, client }: SlackCommandMiddlewareArgs & AllMiddlewareArgs) {
     await ack({ response_type: 'ephemeral', text: 'Generating...' })
 
     const args = command.text.split(" ").filter(x => x.trim() != '')
@@ -17,7 +18,6 @@ export async function handleGraphCommand({ command, logger, ack, respond, client
     } else {
         // Collect all user names from mentions
         await Promise.all(args.map(async arg => {
-            
             try {
                 // strip mention characters from user id
                 const user_id = arg.match(/<@([\w\d]+)\|.+>/)![1]
@@ -26,8 +26,14 @@ export async function handleGraphCommand({ command, logger, ack, respond, client
                     users.push(user.user!.real_name)
                 }
             } catch (e) {
-                logger.warn(`Could not find user ${arg}`, e)
-                await respond({ response_type: 'ephemeral', text: `Could not find user ${arg}` })
+                const members = await getMembers();
+                const matchingMembers = members.filter((person) => person.name.toLowerCase().includes(arg.toLowerCase()))
+                
+                if (matchingMembers.length == 1) {
+                    users.push(matchingMembers[0].name)
+                } else {
+                    await respond({ response_type: 'ephemeral', text: `Could not find user ${arg}` })
+                }
             }
         }))
     }
