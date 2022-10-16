@@ -52,7 +52,11 @@ export async function getMembers():Promise<ApiMember[]> {
 }
 
 export async function updateSlackMembers(client:WebClient):Promise<void> {
-    slackMembers = (await client.users.list()).members!
+    try{
+        slackMembers = (await client.users.list()).members!
+    } catch (err) {
+        console.error('Caught error during client.users.list call', err)
+    }
 }
 
 export async function getSlackMembers():Promise<Member[]> {
