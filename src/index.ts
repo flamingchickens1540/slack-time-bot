@@ -1,4 +1,5 @@
 import { App } from "@slack/bolt";
+import { WebClientEvent } from "@slack/web-api";
 import { CronJob } from "cron";
 import * as uuid from "uuid";
 import { app_token, signing_secret, token } from '../secrets/slack_secrets';
@@ -28,9 +29,14 @@ export const slack_client = slack_app.client;
 
 register_listeners(slack_app)
 
+slack_client.on(WebClientEvent.RATE_LIMITED, (numSeconds) => {
+    console.debug(`A rate-limiting error occurred and the app is going to retry in ${numSeconds} seconds.`);
+});
+
 slack_app.start().then(async () => {
     console.log("Bot started")
 })
+
 // Schedule Tasks
 
 const sendPendingPing = async () => {
