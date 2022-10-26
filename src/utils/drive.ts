@@ -52,6 +52,7 @@ export async function getMembers():Promise<ApiMember[]> {
 }
 
 export async function updateSlackMembers(client:WebClient):Promise<void> {
+    console.log(new Date().toLocaleTimeString(), "updating Slack Members")
     try{
         slackMembers = (await client.users.list()).members!
     } catch (err) {
