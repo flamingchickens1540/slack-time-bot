@@ -3,6 +3,11 @@ import { shorten } from 'tinyurl'
 import { formatNames } from "../messages";
 import { LogRow } from "../types";
 
+setTimeout(async ()=>{
+console.log((await getChartData(['Zach Rutman'])).data.datasets[0].data.length)
+console.log((await getChartData(['Cynthia Yang'])).data.datasets[0].data.length)
+},1000 * 2)
+
 async function getChartData(names: string[]) {
     const data = await getHours()
     let filtered:LogRow[]
@@ -19,13 +24,14 @@ async function getChartData(names: string[]) {
         hours.slice(0, index).forEach(y => { sum += y })
         return sum
     })
-    const chartData = filtered.map((x, index) => {
+    let chartData = filtered.map((x, index) => {
         return {
             x: x.time_in.toDateString(),
             y: cumulative_hours[index].toFixed(1)
         }
     })
-    
+    chartData = [chartData[0],...chartData.slice(-80)]; // cap length at 81
+
     const namestring = formatNames(names)
     return getTimeChartSpecs(namestring, chartData)
 }
@@ -60,7 +66,7 @@ export function getTimeChartSpecs(name: string, dataList: { x: string, y: string
         },
         options: {
             legend: { display: false },
-            title: { display: true, text: `${name}'s Cumulative Hours` },
+            title: { display: true, text: `${name}'s Cumulative Hours!` },
             subtitle: { display: true, text: `${(new Date(dataList[0].x)).toDateString()} - ${(new Date(dataList[dataList.length - 1].x)).toDateString()}` },
             scales: {
                 xAxes: [{
