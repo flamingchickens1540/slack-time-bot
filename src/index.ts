@@ -54,7 +54,7 @@ const sendPendingPing = async () => {
 new CronJob('30 9 * * 1-5', sendPendingPing, null, false, 'America/Los_Angeles').start()
 new CronJob('*/5 * * * *', () => celebrateMembers(slack_app.client), null, false, 'America/Los_Angeles').start()
 new CronJob('0 * * * *', updateUsernames, null, false, 'America/Los_Angeles', null, true).start()
-new CronJob('*/15 * * * *', () => updateSlackMembers(slack_app.client), null, false, 'America/Los_Angeles', null, true).start()
+new CronJob('5/30 * * * *', () => updateSlackMembers(slack_app.client), null, false, 'America/Los_Angeles', null, true).start()
 celebrateMembers(slack_app.client)
 console.log("Cron Job Scheduled!")
 
