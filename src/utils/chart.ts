@@ -3,11 +3,6 @@ import { shorten } from 'tinyurl'
 import { formatNames } from "../messages";
 import { LogRow } from "../types";
 
-setTimeout(async ()=>{
-console.log((await getChartData(['Zach Rutman'])).data.datasets[0].data.length)
-console.log((await getChartData(['Cynthia Yang'])).data.datasets[0].data.length)
-},1000 * 2)
-
 async function getChartData(names: string[]) {
     const data = await getHours()
     let filtered:LogRow[]
