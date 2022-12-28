@@ -112,7 +112,7 @@ export const departmentTitles: { [key in Department]: string } = {
     robotsw: "Robot Software",
     appsw: "App Software",
     community: "Community Engineering",
-    companal: "Competetive Analysis",
+    companal: "Competitive Analysis",
     outreach: "Outreach"
 }
 

@@ -15,15 +15,15 @@ export async function getLeaderboardView(user: string): Promise<KnownBlock[]> {
     // Get the leaderboard
     const hours = await getHours()
     const settings = await getSettings(user)
-    const leaderboard_candidates:LeaderboardEntry[] = await getDepartmentHours(hours)
-    // switch (settings.leaderboard_type) {
-    //     case "department":
-    //         leaderboard_candidates = getDepartmentHours(hours)
-    //         break;
-    //     default:
-    //         leaderboard_candidates = getCandidatesFromFilter(hours, leaderboardFilters[settings.leaderboard_type])
-    //         break;
-    // }
+    let leaderboard_candidates:LeaderboardEntry[];
+    switch (settings.leaderboard_type) {
+        case "department":
+            leaderboard_candidates = await getDepartmentHours(hours)
+            break;
+        default:
+            leaderboard_candidates = getCandidatesFromFilter(hours, leaderboardFilters[settings.leaderboard_type])
+            break;
+    }
     
     
     // Sort the people by hours, reversed
@@ -108,8 +108,8 @@ const getLeaderboardViewBlocks = (leaderboard_entries: { name: string, hours: nu
                     emoji: true
                 },
                 initial_option: metrics[currentMetric],
-                // options: Object.values(metrics),
-                options: [metrics.department],
+                options: Object.values(metrics),
+                // options: [metrics.department],
                 action_id: "selected_metric"
             }
         },
