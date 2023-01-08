@@ -41,8 +41,12 @@ export async function handleGraphCommand({ command, ack, respond, client }: Slac
         await respond({ replace_original: true, response_type: 'ephemeral', text: 'No users specified' })
         return
     }
-    const image_url = await createChart(users)
-    await respond({ text: "Hours graph", blocks: getGraphBlocks(image_url, command.user_id, users), response_type: 'in_channel' })
+    createChart(users).then(async (image_url) => {
+        await respond({ text: "Hours graph", blocks: getGraphBlocks(image_url, command.user_id, users), response_type: 'in_channel' })
+    }).catch(async (e) => {
+        console.log(e)
+        await respond({ replace_original: true, response_type: 'ephemeral', text: 'Could not generate graph!' })
+    })
 }
 
 const getGraphBlocks = (image_url: string, user_id:string, names:string[]): KnownBlock[] => {

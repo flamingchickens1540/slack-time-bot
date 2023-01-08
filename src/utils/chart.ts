@@ -33,6 +33,9 @@ async function getChartData(names: string[]) {
 
 export async function createChart(names: string[]): Promise<string> {
     const chart = await getChartData(names)
+    if (chart == null) {
+        throw new Error("No data to chart")
+    }
     const full_url = `https://quickchart.io/chart?c=${encodeURIComponent(JSON.stringify(chart))}&backgroundColor=white`
     const short_url = await shorten(full_url)
     return short_url
@@ -40,6 +43,7 @@ export async function createChart(names: string[]): Promise<string> {
 
 
 export function getTimeChartSpecs(name: string, dataList: { x: string, y: string }[]) {
+    if (dataList.length == 0) return null
     return {
         type: 'line',
 
