@@ -9,6 +9,7 @@ import { celebrateMembers } from "./tasks/certs";
 import {  loadData, saveData, data, updateUsernames } from "./utils/data";
 import { updateSlackMembers } from "./utils/drive";
 import { getRequestBlocks } from "./views/new_request";
+import { logger } from './logger';
 
 // Initialize global data
 
@@ -23,6 +24,7 @@ const slack_app = new App({
     signingSecret: signing_secret,
     socketMode: true,
     appToken: app_token,
+    logger:logger,
 });
 
 export const slack_client = slack_app.client;
