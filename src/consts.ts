@@ -1,4 +1,3 @@
-// TODO: Update to real sheet and approver ID
 export const json_data_path = 'data/data.json'
 export const certs_cache_data_path = 'data/certs.json'
 export const log_sheet_name = "Log"
@@ -10,4 +9,3 @@ export const leaderboard_config = {
     max_o: Math.round(max_bar_length/3),
     max_y: Math.floor(max_bar_length/3)
 }
-    
