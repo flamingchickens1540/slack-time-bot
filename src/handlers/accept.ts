@@ -24,29 +24,38 @@ export async function handleAcceptModal({ ack, body, view, client }: SlackViewMi
     const time_request = data.timeRequests[request_id]
     
     await client.chat.postMessage({ channel: time_request.userId, text: getAcceptedDm(body.user.id, time_request.time, time_request.activity, body.view.state.values.message.input.value) })
-    await handleAccept(time_request, body, client)
+    await handleAccept(time_request, body, client, "regular")
 
     delete data.timeRequests[request_id]
     saveData()
 }
-
-export async function handleAcceptButton({ ack, body, action, client }: ButtonActionMiddlewareArgs & AllMiddlewareArgs) {
-    await ack()
+export function getAcceptButtonHandler(prefix:keyof typeof submission_prefixes) {
+    return async function({ ack, body, action, client }: ButtonActionMiddlewareArgs & AllMiddlewareArgs) {
+        await ack()
+        
+        const request_id = action.value
+        const time_request = data.timeRequests[request_id]
+        
+        await client.chat.postMessage({ channel: time_request.userId, text: getAcceptedDm(body.user.id, time_request.time, time_request.activity) })
+        await handleAccept(time_request, body, client, prefix)
     
-    const request_id = action.value
-    const time_request = data.timeRequests[request_id]
-    
-    await client.chat.postMessage({ channel: time_request.userId, text: getAcceptedDm(body.user.id, time_request.time, time_request.activity) })
-    await handleAccept(time_request, body, client)
-
-    delete data.timeRequests[request_id]
-    saveData()
+        delete data.timeRequests[request_id]
+        saveData()
+    }
 }
 
-async function handleAccept(time_request:TimeRequest, body:BlockAction|ViewSubmitAction, client:WebClient) {
+
+
+const submission_prefixes = {
+    "regular": "external: ",
+    "summer": "summer: ",
+    "competition": "comp: "
+}
+async function handleAccept(time_request:TimeRequest, body:BlockAction|ViewSubmitAction, client:WebClient, type:keyof typeof submission_prefixes) {
     
     try {
-        await addHours(time_request.name, time_request.time, time_request.activity)
+        
+        await addHours(time_request.name, time_request.time, submission_prefixes[type]+time_request.activity)
     } catch {
         console.error("Failed to add hours with request", time_request)
         return
