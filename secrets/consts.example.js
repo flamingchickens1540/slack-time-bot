@@ -5,7 +5,7 @@ export const slack_admin_id = "USLACKUSER"
 // The ID of a slack channel to celebrate new certs in
 export const slack_celebration_channel = "CSLACKCHANNEL"
 // The ID of a slack channel that is restricted to managers, for use with /voidhours
-export const slack_manager_channel = 'CSLACKCHANNEL'
+export const slack_voider_channel = 'CSLACKCHANNEL'
 // The API endpoint of a CLUCK server
 export const cluck_baseurl = 'http://localhost:4000'
 // The Souper Secret CLUCK Api Key

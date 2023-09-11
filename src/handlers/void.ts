@@ -1,33 +1,33 @@
 import type { SlackCommandMiddlewareArgs, AllMiddlewareArgs } from "@slack/bolt";
 import { voidHours } from "../utils/drive";
 import { WebClient } from "@slack/web-api";
-import { slack_manager_channel } from "../../secrets/consts";
+import { slack_voider_channel } from "../../secrets/consts";
 
 
-async function isManager(client:WebClient, user_id:string) {
-    const conversations = await client.conversations.members({channel:slack_manager_channel})
+async function isVoider(client:WebClient, user_id:string) {
+    const conversations = await client.conversations.members({channel:slack_voider_channel})
     if (!conversations.ok) {
         console.warn(conversations.error)
         return {
             ok:false,
-            isManager: null
+            isVoider: null
         }
     }
     return {
         ok: true,
-        isManager: conversations.members!.some((member) => member == user_id) 
+        isVoider: conversations.members!.some((member) => member == user_id) 
     }
 }
 
 export async function handleVoidCommand({ command, logger, ack, respond, client }: SlackCommandMiddlewareArgs & AllMiddlewareArgs) {
     await ack()
-    const isInvokerManager = await isManager(client, command.user_id)
-    if (!isInvokerManager.ok) {
+    const invokerPermissions = await isVoider(client, command.user_id)
+    if (!invokerPermissions.ok) {
         await respond({response_type:"ephemeral", text:"Something went wrong!"})
         return
     }
-    if (!isInvokerManager.isManager) {
-        await respond({response_type:"ephemeral", text: "Must be a manager to run this command"})
+    if (!invokerPermissions.isVoider) {
+        await respond({response_type:"ephemeral", text: "Must be a copresident to run this command"})
         return
     }
 
@@ -44,9 +44,9 @@ export async function handleVoidCommand({ command, logger, ack, respond, client 
             await respond({response_type:"ephemeral", text:`Could not find user <@${target_id}>`})
             return
         }
-        const isTargetManager = await isManager(client, target.user!.id!)
-        if (isTargetManager.isManager) {
-            await respond({response_type: "ephemeral", text:"Cannot void hours for other managers!"})
+        const isTargetManager = await isVoider(client, target.user!.id!)
+        if (isTargetManager.isVoider) {
+            await respond({response_type: "ephemeral", text:"Cannot void hours for other voiders!"})
             return
         }
         const name = target.user!.real_name!
@@ -55,7 +55,8 @@ export async function handleVoidCommand({ command, logger, ack, respond, client 
             case 200:
                 await respond({response_type:"ephemeral", text: `Successfully voided hours for ${name}`})
                 console.log(`${command.user_name} has voided hours for ${name}`)
-                client.chat.postMessage({channel:target.user!.id!, text:"Your current time sheet session has been voided by a manager. You will need to sign in again when you resume work"})
+                client.chat.postMessage({channel:target.user!.id!, text:"Your current time sheet session has been voided by the leadership ⛵. You will need to sign in again when you resume work"})
+                client.chat.postMessage({channel:slack_voider_channel, text:`<@${command.user_id}> has voided hours for <@${target_id}>`})
                 break;
             case 422:
                 await respond({response_type:"ephemeral", text: `${name} is not logged in`})
