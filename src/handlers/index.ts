@@ -6,12 +6,14 @@ import { handleLogCommand, handleLogModal, handleLogShortcut } from "./log";
 import { handleLogoutCommand } from "./logout";
 import { handleRejectButton, handleRejectModal } from "./reject";
 import { handleOpenSettingsModal, handleSettingsSave } from "./settings";
+import { handleVoidCommand } from "./void";
 
 export function register_listeners(app:App) {
 	// Commands and Shortcuts
 	app.command('/log', handleLogCommand)
 	app.command('/graph', handleGraphCommand)
 	app.command('/clearlogin', handleLogoutCommand)
+	app.command("/voidtime", handleVoidCommand)
 	app.shortcut('log_hours', handleLogShortcut)
 
 	// Buttons
