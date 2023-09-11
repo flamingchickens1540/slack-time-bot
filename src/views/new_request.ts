@@ -26,10 +26,30 @@ export function getRequestBlocks(uid: string, hrs: number, activity: string, req
                     text: {
                         type: "plain_text",
                         emoji: true,
-                        text: "Add to Sheet"
+                        text: "Accept"
                     },
                     style: "primary",
                     action_id: "accept",
+                    value: request_id
+                },
+                {
+                    type: "button",
+                    text: {
+                        type: "plain_text",
+                        emoji: true,
+                        text: "Accept Summer ☀️"
+                    },
+                    action_id: "accept_summer",
+                    value: request_id
+                },
+                {
+                    type: "button",
+                    text: {
+                        type: "plain_text",
+                        emoji: true,
+                        text: "Accept Competition"
+                    },
+                    action_id: "accept_comp",
                     value: request_id
                 },
                 {
