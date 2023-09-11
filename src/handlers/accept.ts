@@ -24,7 +24,7 @@ export async function handleAcceptModal({ ack, body, view, client }: SlackViewMi
     const time_request = data.timeRequests[request_id]
     
     await client.chat.postMessage({ channel: time_request.userId, text: getAcceptedDm(body.user.id, time_request.time, time_request.activity, body.view.state.values.message.input.value) })
-    await handleAccept(time_request, body, client, "regular")
+    await handleAccept(time_request, body, client, body.view.state.values.type_selector.selector.selected_option?.value as keyof typeof submission_prefixes ?? "regular")
 
     delete data.timeRequests[request_id]
     saveData()
