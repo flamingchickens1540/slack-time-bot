@@ -1,11 +1,11 @@
 import type { SlackCommandMiddlewareArgs, AllMiddlewareArgs } from "@slack/bolt";
 import { voidHours } from "../utils/drive";
-import { certs } from "../utils/data";
 import { WebClient } from "@slack/web-api";
-import { readFileSync } from 'fs';
+import { slack_manager_channel } from "../../secrets/consts";
+
 
 async function isManager(client:WebClient, user_id:string) {
-    const conversations = await client.conversations.members({channel:"C05R9UGJDM5"}) //TODO: Put in constants file
+    const conversations = await client.conversations.members({channel:slack_manager_channel})
     if (!conversations.ok) {
         console.warn(conversations.error)
         return {
