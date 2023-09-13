@@ -80,6 +80,11 @@ export async function voidHours(name:string):Promise<number>{
     return response.status
 }
 
+
+export async function getLoggedIn():Promise<string[]> {
+    const response = await fetch(cluck_baseurl + "/api/loggedin")
+    return Object.keys(await response.json() as object)
+}
 export async function getHours(): Promise<LogRow[]> {
     if (!googleDriveAuthed) return [];
     await sheet.loadCells()
