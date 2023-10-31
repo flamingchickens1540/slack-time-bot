@@ -5,14 +5,12 @@ import { getMembers } from "../utils/drive";
 
 
 export async function handleGraphCommand({ command, ack, respond, client }: SlackCommandMiddlewareArgs & AllMiddlewareArgs) {
-    await ack({ response_type: 'ephemeral', text: 'Generating...' })
+    await ack({ response_type: 'ephemeral', text: 'Generating graph...' })
 
     const args = command.text.split(" ").filter(x => x.trim() != '')
-    let users: string[] = []
-    if (args.length == 0) {
-        const user = await client.users.info({ user: command.user_id })
-        users = [user.user!.real_name!]
-    } else if (args[0] == 'all') {
+    const user = await client.users.info({ user: command.user_id })
+    const users: string[] = [user.user!.real_name!]
+    if (args.length > 0 && args[0] == 'all') {
         await respond({ text: "Hours graph", blocks: getGraphBlocks("https://docs.google.com/spreadsheets/d/e/2PACX-1vSHrWf9EtoNjuaGFuBy0IsnMQ5zDS1YLWCDwwyb0df0bjAf-13Nqt3z8bt7b3YA1_NhfHn6J2TjyLyl/pubchart?oid=1533918925&format=image", command.user_id, ["all"]), response_type: 'in_channel' })
         return;
     } else {
@@ -41,8 +39,8 @@ export async function handleGraphCommand({ command, ack, respond, client }: Slac
         await respond({ replace_original: true, response_type: 'ephemeral', text: 'No users specified' })
         return
     }
-    createChart(users).then(async (image_url) => {
-        await respond({ text: "Hours graph", blocks: getGraphBlocks(image_url, command.user_id, users), response_type: 'in_channel' })
+    createChart([...new Set(users)]).then(async (image_url) => {
+        await respond({ text: "Hours graph", blocks: getGraphBlocks(image_url, command.user_id, users), response_type: command.channel_id.startsWith("D") ? 'in_channel' : "ephemeral" })
     }).catch(async (e) => {
         console.log(e)
         await respond({ replace_original: true, response_type: 'ephemeral', text: 'Could not generate graph!' })
