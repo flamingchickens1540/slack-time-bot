@@ -3,3 +3,4 @@
 export const signing_secret = 'signing secret';
 export const token = 'xoxb-token';
 export const app_token = 'xapp-token'
+export const user_token = 'xoxp-token'
