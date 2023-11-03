@@ -107,7 +107,7 @@ export const getSettingsBlocksDepartment = (user_id: string): KnownBlock[] => {
 
 
 export const departmentTitles: { [key in Department]: string } = {
-    fab: "Fabrication",
+    fab: "Fabrication / Design",
     controls: "Controls",
     robotsw: "Robot Software",
     appsw: "App Software",

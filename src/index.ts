@@ -10,6 +10,8 @@ import {  loadData, saveData, data, updateUsernames } from "./utils/data";
 import { updateSlackMembers } from "./utils/drive";
 import { getRequestBlocks } from "./views/new_request";
 import { logger } from './logger';
+import { setDepartment } from "./utils/profile";
+import { departmentTitles } from "./views/settings";
 
 // Initialize global data
 
@@ -32,11 +34,18 @@ export const slack_client = slack_app.client;
 register_listeners(slack_app)
 
 slack_client.on(WebClientEvent.RATE_LIMITED, (numSeconds) => {
-    console.debug(`A rate-limiting error occurred and the app is going to retry in ${numSeconds} seconds.`);
+    console.debug(`A rate-limiting error occurred and the app is going to retry in ${numSeconds} seconds. You may ignore this error`);
 });
 
 slack_app.start().then(async () => {
     console.log("Bot started")
+
+    await Promise.all(Object.entries(data.userSettings).map(async ([id, settings]) => {
+        if (settings.department) {
+            await setDepartment(id, departmentTitles[settings.department])
+        }
+    }))
+    
 })
 
 // Schedule Tasks

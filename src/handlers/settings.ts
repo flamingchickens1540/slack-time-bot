@@ -2,8 +2,9 @@ import type { AllMiddlewareArgs, SlackViewMiddlewareArgs, ViewSubmitAction } fro
 import { slack_admin_id } from "../../secrets/consts"
 import type { ButtonActionMiddlewareArgs, Department } from "../types"
 import { ensureSettingsExist, saveData, data } from "../utils/data"
-import { getSettingsView } from "../views/settings"
+import { departmentTitles, getSettingsView } from "../views/settings"
 import { publishDefaultHomeView } from "./app_home"
+import { setDepartment } from "../utils/profile"
 
 
 export async function handleOpenSettingsModal({ ack, client, body, logger }: ButtonActionMiddlewareArgs & AllMiddlewareArgs) {
@@ -24,6 +25,7 @@ export async function handleSettingsSave({ack, view, body, client}:SlackViewMidd
     }
     await ensureSettingsExist(body.user.id)
     data.userSettings[body.user.id].department = view.state.values.department_selector.selected_department.selected_option!.value! as Department
+    await setDepartment(body.user.id, departmentTitles[data.userSettings[body.user.id].department??""] ?? "")
     await saveData()
     await publishDefaultHomeView(body.user.id, client)
 }

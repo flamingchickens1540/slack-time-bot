@@ -3,6 +3,7 @@ import { slack_celebration_channel } from "../../secrets/consts";
 import { Certification, Member } from "../types";
 import { certs, saveData } from "../utils/data";
 import { getMembers, getSlackMembers } from "../utils/drive";
+import { setProfileCerts } from "../utils/profile";
 
 const congratsMessages = [
     "Hey! Congrats @ for you new {} Cert!",
@@ -12,7 +13,7 @@ const congratsMessages = [
     "Friends! @ has earned a {}. May we all feast and be merry. :shallow_pan_of_food: ",
     "Congrats to @ on getting a {} certification!",
     "@ just earned a {}. Did you know: Software is the bread and butter of robotics.",
-    ]
+]
 
 export async function celebrateMembers(client: WebClient) {
     const slackMembers = await getSlackMembers();
@@ -26,21 +27,28 @@ export async function celebrateMembers(client: WebClient) {
             }
         })
         certs[member.name] = member.certs
-        await saveData()
+        const user = slackMembers?.find((slack_member) => slack_member.real_name == member.name)
+        if (user == null) {
+            console.error(`Could not find user ${member.name}`)
+            return
+        }
+
         if (newCerts.length > 0) {
-            const user = slackMembers?.find((slack_member) => slack_member.real_name == member.name)
+            const certnames = member.certs.map((cert) => cert.name)
+            console.log(`Setting certs for ${user.real_name?.padEnd(50, " ")} [${certnames.join(", ").length}]: ${certnames}`)
+            await setProfileCerts(user!.id!, certnames)
+
             const userText = (user == null) ? member.name : `<@${user.id}>`;
             newCerts.forEach(async (cert) => {
-                let message = congratsMessages[Math.floor(Math.random()*congratsMessages.length)]; // get random message
-                message = message.replace('@',userText) // set user mention
-                message = message.replace('{}',`*${cert.name}*`) // set cert name in *bold*
+                let message = congratsMessages[Math.floor(Math.random() * congratsMessages.length)]; // get random message
+                message = message.replace('@', userText) // set user mention
+                message = message.replace('{}', `*${cert.name}*`) // set cert name in *bold*
 
                 await client.chat.postMessage({ channel: slack_celebration_channel, text: message })
             })
         }
-        
     })
-    
     await Promise.all(promises)
-    
+    await saveData()
+
 }
