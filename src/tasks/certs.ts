@@ -29,7 +29,7 @@ export async function celebrateMembers(client: WebClient) {
         certs[member.name] = member.certs
         const user = slackMembers?.find((slack_member) => slack_member.real_name == member.name)
         if (user == null) {
-            console.warn(`Could not find user ${member.name}`)
+            console.log(`Could not find user ${member.name}`)
             return
         }
 
