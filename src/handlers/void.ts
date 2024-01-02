@@ -55,7 +55,6 @@ export async function handleVoidCommand({ command, logger, ack, respond, client 
             case 200:
                 await respond({response_type:"ephemeral", text: `Successfully voided hours for ${name}`})
                 console.log(`${command.user_name} has voided hours for ${name}`)
-                client.chat.postMessage({channel:target.user!.id!, text:"Your current time sheet session has been voided by the leadership ⛵. You will need to sign in again when you resume work"})
                 client.chat.postMessage({channel:slack_voider_channel, text:`<@${command.user_id}> has voided hours for <@${target_id}>`})
                 break;
             case 422:
